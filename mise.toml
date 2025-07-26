@@ -1,0 +1,4 @@
+[tools]
+elixir = "1.18.4"
+erlang = "28.0.2"
+zig = "0.14.0"
