@@ -1,6 +1,6 @@
 # 🔥 Ignite
 
-> An LLM-powered coding experience that breaks free from platform constraints
+> An LLM-powered app development experience that breaks free from platform constraints
 
 ## 🚀 Vision
 
