@@ -37,10 +37,11 @@ if [ "$LOCAL_MODE" = "false" ]; then
     fi
 fi
 
-print_status "Building release..."
+print_status "Building release with Burrito..."
 
 # Clean previous builds
 rm -rf _build/prod
+rm -rf burrito_out
 
 # Get dependencies and compile
 MIX_ENV=prod mix deps.get
@@ -49,56 +50,41 @@ MIX_ENV=prod mix compile
 # Ensure assets are built for production
 MIX_ENV=prod mix assets.deploy
 
-# Build the release
-MIX_ENV=prod mix release --overwrite
+# Build the release with Burrito
+print_status "Running mix release with Burrito..."
+MIX_ENV=prod BURRITO_TARGET=macos_arm mix release --overwrite
 
-print_status "Packaging release..."
+print_status "Looking for Burrito output..."
 
-# Package the release
-RELEASE_DIR="_build/prod/rel/ignite"
-
-# Create a temporary directory for the release
-rm -rf release-package
-mkdir -p release-package
-cd release-package
-
-# Copy the entire release directory contents
-cp -r ../$RELEASE_DIR/* .
-
-# Create a wrapper script at the top level
-cat > ignite << 'EOF'
-#!/bin/bash
-# Ignite CLI
-
-# Determine the directory where this script resides
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
-# If no arguments provided, default to "start"
-if [ $# -eq 0 ]; then
-  exec "$SCRIPT_DIR/bin/ignite" start
-else
-  # Pass through any provided arguments
-  exec "$SCRIPT_DIR/bin/ignite" "$@"
+# Find the Burrito executable
+if [ ! -d "burrito_out" ]; then
+    print_error "Burrito output directory not found!"
+    exit 1
 fi
-EOF
 
+# Find the macOS executable
+BURRITO_BINARY=$(find burrito_out -type f -name "ignite*" | grep -v ".exe" | head -1)
+
+if [ -z "$BURRITO_BINARY" ] || [ ! -f "$BURRITO_BINARY" ]; then
+    print_error "Burrito binary not found!"
+    ls -la burrito_out/
+    exit 1
+fi
+
+print_status "Found Burrito binary: $BURRITO_BINARY"
+
+# Copy the binary to current directory with simple name
+cp "$BURRITO_BINARY" ignite
 chmod +x ignite
-
-# Make the main binary executable as well
-chmod +x bin/ignite
 
 # Test the release
 print_status "Testing release..."
 ./ignite eval "IO.puts(:ignite |> Application.spec(:vsn))" || echo "Version check failed"
 
-# Check what type of file the executables are
-print_status "Checking executable types..."
+# Check what type of file the executable is
+print_status "Checking executable type..."
 file ignite
-file bin/ignite
 ls -la ignite
-ls -la bin/ignite
-
-cd ..
 
 CERTIFICATE_NAME="Developer ID Application: Tuist GmbH (U6LC622NKF)"
 
@@ -126,53 +112,26 @@ if [ "$LOCAL_MODE" = "false" ]; then
     # Verify certificate is available
     print_status "Verifying certificate..."
     security find-identity -v -p codesigning
-else
-    print_status "Local mode: Using existing keychain and certificates"
-fi
 
-if [ "$LOCAL_MODE" = "false" ]; then
-    print_status "Signing executables..."
+    print_status "Signing executable..."
 
-    # Sign all executables in the release to avoid macOS security warnings
-    print_status "Finding and signing all executables..."
+    # Sign the single Burrito executable
+    /usr/bin/codesign --force --sign "$CERTIFICATE_NAME" --timestamp --options runtime --verbose ignite
     
-    # Sign all files in bin directory
-    find release-package/bin -type f -perm +111 | while read -r file; do
-        echo "Signing: $file"
-        /usr/bin/codesign --force --sign "$CERTIFICATE_NAME" --timestamp --options runtime --verbose "$file"
-    done
+    # Verify the signature
+    print_status "Verifying signature..."
+    /usr/bin/codesign --verify --deep --verbose ignite
     
-    # Sign all ERTS binaries (these are what trigger the malware warnings)
-    if [ -d "release-package/erts-"* ]; then
-        find release-package/erts-*/bin -type f -perm +111 | while read -r file; do
-            echo "Signing ERTS binary: $file"
-            /usr/bin/codesign --force --sign "$CERTIFICATE_NAME" --timestamp --options runtime --verbose "$file"
-        done
-    fi
-    
-    # Sign any native libraries
-    find release-package -name "*.so" -o -name "*.dylib" | while read -r file; do
-        echo "Signing library: $file"
-        /usr/bin/codesign --force --sign "$CERTIFICATE_NAME" --timestamp --verbose "$file"
-    done
-    
-    print_status "All executables signed"
+    print_status "Executable signed successfully"
 else
     print_status "Local mode: Skipping code signing"
 fi
 
-print_status "Creating release archive..."
-
-# Notarization is not needed for CLI tools, only GUI apps
-print_status "Skipping notarization (not required for CLI tools)"
-
-# Now create the distribution archive
+# Create the distribution archive with just the executable
 print_status "Creating distribution archive..."
-cd release-package
-tar -czf ../ignite-macos.tar.gz .
-cd ..
+tar -czf ignite-macos.tar.gz ignite
 
-# Generate checksums for the tar.gz (distribution file)
+# Generate checksums
 shasum -a 256 ignite-macos.tar.gz > SHA256.txt
 shasum -a 512 ignite-macos.tar.gz > SHA512.txt
 
@@ -189,10 +148,11 @@ if [ "$LOCAL_MODE" = "false" ] && [ -n "$KEYCHAIN_PATH" ]; then
 fi
 
 # Clean up temporary files
-rm -rf release-package
+rm -f ignite
+rm -rf burrito_out
 
 print_status "Release build complete!"
 echo "Artifacts created:"
-echo "  - ignite-macos.tar.gz"
+echo "  - ignite-macos.tar.gz (single portable executable)"
 echo "  - SHA256.txt"
 echo "  - SHA512.txt"
