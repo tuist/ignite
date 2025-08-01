@@ -95,6 +95,17 @@ jobs:
           mise install
           mix deps.get --only prod
 
+      - name: Verify environment variables
+        run: |
+          # Ensure mise loads the encrypted environment
+          mise exec -- env | grep -E "CERTIFICATE_PASSWORD|APP_SPECIFIC_PASSWORD|BASE_64_DEVELOPER_ID_APPLICATION_CERTIFICATE" > /dev/null || {
+            echo "ERROR: Required environment variables are not loaded"
+            echo "Checking mise environment setup..."
+            mise doctor
+            exit 1
+          }
+          echo "✓ Environment variables loaded successfully"
+
       - name: Build release
         id: build
         env:
@@ -102,29 +113,29 @@ jobs:
         run: |
           # Ensure assets are built for production
           mix assets.deploy
-          
+
           # Build the release
           mix release --overwrite
-          
+
           # Package the release
           echo "Creating release archive..."
           RELEASE_DIR="_build/prod/rel/ignite"
-          
+
           # Create a temporary directory for the release
           mkdir -p release-package
           cd release-package
-          
+
           # Copy the entire release directory contents
           cp -r ../$RELEASE_DIR/* .
-          
+
           # Create a wrapper script at the top level
           cat > ignite << 'EOF'
           #!/bin/bash
           # Ignite CLI
-          
+
           # Determine the directory where this script resides
           SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-          
+
           # If no arguments provided, default to "start"
           if [ $# -eq 0 ]; then
             exec "$SCRIPT_DIR/bin/ignite" start
@@ -133,55 +144,57 @@ jobs:
             exec "$SCRIPT_DIR/bin/ignite" "$@"
           fi
           EOF
-          
+
           chmod +x ignite
-          
+
           # Make the main binary executable as well
           chmod +x bin/ignite
-          
+
           # Test the release
           echo "Testing release..."
           ./ignite eval "IO.puts(:ignite |> Application.spec(:vsn))" || echo "Version check failed"
-          
+
           cd ..
 
       - name: Setup Keychain for signing
         run: |
+          mise exec -- bash -c '
           TMP_DIR=$(mktemp -d)
           KEYCHAIN_PATH=$TMP_DIR/keychain.keychain
           KEYCHAIN_PASSWORD=$(uuidgen)
-          
+
           # Create a new temporary keychain
           security create-keychain -p $KEYCHAIN_PASSWORD $KEYCHAIN_PATH
           security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
           security default-keychain -s $KEYCHAIN_PATH
           security unlock-keychain -p $KEYCHAIN_PASSWORD $KEYCHAIN_PATH
-          
+
           # Import certificate
           echo $BASE_64_DEVELOPER_ID_APPLICATION_CERTIFICATE | base64 --decode > $TMP_DIR/certificate.p12
           security import $TMP_DIR/certificate.p12 -P $CERTIFICATE_PASSWORD -A
-          
+
           rm -rf $TMP_DIR
+          '
 
       - name: Sign release binaries
         run: |
           CERTIFICATE_NAME="Developer ID Application: Tuist GmbH (U6LC622NKF)"
-          
+
           # Sign all executable files in the release
           echo "Signing executables..."
-          
+
           # Sign the main ignite wrapper
           /usr/bin/codesign --sign "$CERTIFICATE_NAME" --timestamp --options runtime --verbose release-package/ignite
-          
+
           # Sign the actual Elixir release binary
           /usr/bin/codesign --sign "$CERTIFICATE_NAME" --timestamp --options runtime --verbose release-package/bin/ignite
-          
+
           # Sign any other executables in bin directory
           find release-package/bin -type f -perm +111 | while read -r file; do
             echo "Signing: $file"
             /usr/bin/codesign --sign "$CERTIFICATE_NAME" --timestamp --options runtime --verbose "$file" || true
           done
-          
+
           # Sign ERTS binaries
           if [ -d "release-package/erts-"* ]; then
             find release-package/erts-*/bin -type f -perm +111 | while read -r file; do
@@ -196,11 +209,11 @@ jobs:
           cd release-package
           tar -czf ../ignite-macos.tar.gz .
           cd ..
-          
+
           # Generate checksums
           shasum -a 256 ignite-macos.tar.gz > SHA256.txt
           shasum -a 512 ignite-macos.tar.gz > SHA512.txt
-          
+
           # Display checksums
           echo "SHA256:"
           cat SHA256.txt
@@ -209,11 +222,12 @@ jobs:
 
       - name: Notarize release archive
         run: |
+          mise exec -- bash -c '
           APPLE_ID="pedro@pepicrft.me"
-          TEAM_ID='U6LC622NKF'
-          
+          TEAM_ID="U6LC622NKF"
+
           echo "Submitting for notarization..."
-          
+
           # Submit for notarization
           RAW_JSON=$(xcrun notarytool submit "ignite-macos.tar.gz" \
               --apple-id "$APPLE_ID" \
@@ -221,17 +235,17 @@ jobs:
               --password "$APP_SPECIFIC_PASSWORD" \
               --output-format json)
           echo "$RAW_JSON"
-          SUBMISSION_ID=$(echo "$RAW_JSON" | jq -r '.id')
+          SUBMISSION_ID=$(echo "$RAW_JSON" | jq -r ".id")
           echo "Submission ID: $SUBMISSION_ID"
-          
+
           # Wait for notarization
           while true; do
               STATUS=$(xcrun notarytool info "$SUBMISSION_ID" \
                   --apple-id "$APPLE_ID" \
                   --team-id "$TEAM_ID" \
                   --password "$APP_SPECIFIC_PASSWORD" \
-                  --output-format json | jq -r '.status')
-              
+                  --output-format json | jq -r ".status")
+
               case $STATUS in
                   "Accepted")
                       echo "Notarization succeeded!"
@@ -255,9 +269,10 @@ jobs:
                       ;;
               esac
           done
-          
+
           # Staple the notarization (not applicable to tar.gz, but keeping for reference)
           # xcrun stapler staple ignite-macos.tar.gz || echo "Stapling not supported for tar.gz"
+          '
 
       - name: Upload artifacts
         id: upload
@@ -295,20 +310,20 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          
+
           # Add changed files
           git add CHANGELOG.md mix.exs
-          
+
           # Check if there are changes to commit
           if ! git diff --cached --quiet; then
             git commit -m "[Release] Ignite ${{ needs.check-release.outputs.next-version }}"
           else
             echo "No changes to commit"
           fi
-          
+
           # Create tag
           git tag ${{ needs.check-release.outputs.next-version }}
-          
+
           # Push with retry logic
           max_attempts=5
           attempt=1
@@ -324,7 +339,7 @@ jobs:
             sleep 5
             attempt=$((attempt + 1))
           done
-          
+
           if [ $attempt -gt $max_attempts ]; then
             echo "Failed to push after $max_attempts attempts"
             exit 1
