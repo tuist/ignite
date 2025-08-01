@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 
 <!-- RELEASE NOTES START -->
+## [0.11.0] - 2025-08-01
+
+### <!-- 0 -->⛰️  Features
+- Add Swift package and integrate with release process by @pepicrft
+**Full Changelog**: https://github.com/tuist/ignite/compare/0.10.0...0.11.0
+<!-- RELEASE NOTES START -->
+## [0.10.0] - 2025-08-01
+
+### <!-- 0 -->⛰️  Features
+- Change install location to ~/.local/share/ignite to avoid sudo by @pepicrft
+**Full Changelog**: https://github.com/tuist/ignite/compare/0.9.0...0.10.0
+<!-- RELEASE NOTES START -->
 ## [0.9.0] - 2025-08-01
 
 ### <!-- 0 -->⛰️  Features
