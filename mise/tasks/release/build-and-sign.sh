@@ -150,12 +150,17 @@ fi
 
 print_status "Creating release archive..."
 
-# Create tar.gz archive from inside the directory to avoid extra folder
+# Create zip archive for notarization from inside the directory
+cd release-package
+zip -q -r --symlinks ../ignite-macos.zip .
+cd ..
+
+# Create tar.gz archive for distribution
 cd release-package
 tar -czf ../ignite-macos.tar.gz .
 cd ..
 
-# Generate checksums
+# Generate checksums for the tar.gz (distribution file)
 shasum -a 256 ignite-macos.tar.gz > SHA256.txt
 shasum -a 512 ignite-macos.tar.gz > SHA512.txt
 
@@ -171,8 +176,8 @@ if [ "$LOCAL_MODE" = "false" ]; then
     APPLE_ID="pedro@pepicrft.me"
     TEAM_ID="U6LC622NKF"
 
-    # Submit for notarization
-    RAW_JSON=$(xcrun notarytool submit "ignite-macos.tar.gz" \
+    # Submit zip file for notarization
+    RAW_JSON=$(xcrun notarytool submit "ignite-macos.zip" \
         --apple-id "$APPLE_ID" \
         --team-id "$TEAM_ID" \
         --password "$APP_SPECIFIC_PASSWORD" \
@@ -224,6 +229,7 @@ fi
 
 # Clean up temporary files
 rm -rf release-package
+rm -f ignite-macos.zip  # Remove the zip file used for notarization
 
 print_status "Release build complete!"
 echo "Artifacts created:"
