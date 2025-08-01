@@ -1,4 +1,18 @@
 [tools]
-elixir = "1.18.4"
-erlang = "28.0.2"
-zig = "0.14.0"
+    elixir = "1.18.4"
+    erlang = "28.0.2"
+    zig = "0.14.0"
+    git-cliff = "2.4.0"
+    sops = "3.9.3"
+    age = "1.2.1"
+
+[env]
+    _.file = ".env.json"
+    ERL_AFLAGS = "-kernel shell_history enabled -kernel shell_history_file_bytes 1024000"
+
+[settings]
+    jobs = 6
+    http_timeout = "60"
+    experimental = true
+    sops.age_key_file = "~/.config/mise/tuist-ignite-age.txt"
+    sops.strict = false

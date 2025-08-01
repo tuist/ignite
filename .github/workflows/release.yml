@@ -1,0 +1,318 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: read
+  statuses: write
+
+concurrency:
+  group: release-workflow-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  MISE_SOPS_AGE_KEY: ${{ secrets.MISE_SOPS_AGE_KEY }}
+
+jobs:
+  check-release:
+    name: Check for releasable changes
+    runs-on: ubuntu-latest
+    outputs:
+      should-release: ${{ steps.check.outputs.should-release }}
+      next-version: ${{ steps.check.outputs.next-version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: jdx/mise-action@v2
+
+      - name: Check for releasable changes
+        id: check
+        run: |
+          # Generate the changelog with git cliff
+          git-cliff --bump --unreleased > new_changelog.md
+
+          # Check if there are any changes to release
+          if [ -f CHANGELOG.md ]; then
+            # Compare the new changelog with the existing one
+            if diff -q CHANGELOG.md new_changelog.md > /dev/null 2>&1; then
+              echo "No new changes to release"
+              echo "should-release=false" >> "$GITHUB_OUTPUT"
+              echo "next-version=" >> "$GITHUB_OUTPUT"
+            else
+              # Get the next version
+              NEXT_VERSION=$(git-cliff --bumped-version)
+              echo "New version to release: $NEXT_VERSION"
+              echo "should-release=true" >> "$GITHUB_OUTPUT"
+              echo "next-version=$NEXT_VERSION" >> "$GITHUB_OUTPUT"
+            fi
+          else
+            # First release
+            NEXT_VERSION=$(git-cliff --bumped-version)
+            echo "First release: $NEXT_VERSION"
+            echo "should-release=true" >> "$GITHUB_OUTPUT"
+            echo "next-version=$NEXT_VERSION" >> "$GITHUB_OUTPUT"
+          fi
+          rm -f new_changelog.md
+
+  build-macos:
+    name: Build macOS Release
+    needs: check-release
+    if: needs.check-release.outputs.should-release == 'true'
+    runs-on: macos-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    outputs:
+      artifacts-uploaded: ${{ steps.upload.outputs.uploaded }}
+      release-notes: ${{ steps.release-notes.outputs.RELEASE_NOTES }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: jdx/mise-action@v2
+
+      - name: Get release notes
+        id: release-notes
+        run: |
+          echo "RELEASE_NOTES<<EOF" >> "$GITHUB_OUTPUT"
+          git-cliff --latest --strip all >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Update version in mix.exs
+        run: |
+          VERSION="${{ needs.check-release.outputs.next-version }}"
+          sed -i '' "s/@version \".*\"/@version \"$VERSION\"/" mix.exs
+
+      - name: Update CHANGELOG.md
+        run: git-cliff --bump -o CHANGELOG.md
+
+      - name: Setup Elixir and dependencies
+        run: |
+          mise install
+          mix deps.get --only prod
+
+      - name: Build release with Burrito
+        id: build
+        env:
+          MIX_ENV: prod
+          BURRITO_TARGET: macos_m1
+        run: |
+          # Ensure assets are built for production
+          mix assets.deploy
+
+          # Build the release
+          mix release --overwrite
+
+          # Find the burrito executable
+          # Burrito might output to different locations depending on configuration
+          POSSIBLE_LOCATIONS=(
+            "_build/prod/rel/ignite/ignite"
+            "_build/prod/burrito_out/ignite_macos_m1"
+            "_build/prod/burrito_out/ignite"
+            "_build/prod/rel/burrito_out/ignite_macos_m1"
+            "_build/prod/rel/burrito_out/ignite"
+          )
+
+          BURRITO_OUTPUT=""
+          for location in "${POSSIBLE_LOCATIONS[@]}"; do
+            if [ -f "$location" ]; then
+              BURRITO_OUTPUT="$location"
+              echo "Burrito executable found at $BURRITO_OUTPUT"
+              break
+            fi
+          done
+
+          if [ -z "$BURRITO_OUTPUT" ]; then
+            echo "ERROR: Burrito executable not found"
+            echo "Searching for executable files in build directory:"
+            find _build -type f -perm +111 -name "*ignite*" 2>/dev/null || true
+            echo ""
+            echo "Full _build directory structure:"
+            find _build -type f -name "*" | head -50
+            exit 1
+          fi
+
+          cp "$BURRITO_OUTPUT" ./ignite
+          chmod +x ./ignite
+
+          # Test the executable
+          echo "Testing executable..."
+          ./ignite --version || echo "Version command not available"
+
+      - name: Setup Keychain for signing
+        run: |
+          TMP_DIR=$(mktemp -d)
+          KEYCHAIN_PATH=$TMP_DIR/keychain.keychain
+          KEYCHAIN_PASSWORD=$(uuidgen)
+
+          # Create a new temporary keychain
+          security create-keychain -p $KEYCHAIN_PASSWORD $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security default-keychain -s $KEYCHAIN_PATH
+          security unlock-keychain -p $KEYCHAIN_PASSWORD $KEYCHAIN_PATH
+
+          # Import certificate
+          echo $BASE_64_DEVELOPER_ID_APPLICATION_CERTIFICATE | base64 --decode > $TMP_DIR/certificate.p12
+          security import $TMP_DIR/certificate.p12 -P $CERTIFICATE_PASSWORD -A
+
+          rm -rf $TMP_DIR
+
+      - name: Sign and notarize
+        run: |
+          APPLE_ID="pedro@pepicrft.me"
+          TEAM_ID='U6LC622NKF'
+          CERTIFICATE_NAME="Developer ID Application: Tuist GmbH (U6LC622NKF)"
+
+          # Sign the executable
+          /usr/bin/codesign --sign "$CERTIFICATE_NAME" --timestamp --options runtime --verbose ignite
+
+          # Create a zip for notarization
+          zip -q -r ignite-notarization.zip ignite
+
+          # Submit for notarization
+          RAW_JSON=$(xcrun notarytool submit "ignite-notarization.zip" \
+              --apple-id "$APPLE_ID" \
+              --team-id "$TEAM_ID" \
+              --password "$APP_SPECIFIC_PASSWORD" \
+              --output-format json)
+          echo "$RAW_JSON"
+          SUBMISSION_ID=$(echo "$RAW_JSON" | jq -r '.id')
+          echo "Submission ID: $SUBMISSION_ID"
+
+          # Wait for notarization
+          while true; do
+              STATUS=$(xcrun notarytool info "$SUBMISSION_ID" \
+                  --apple-id "$APPLE_ID" \
+                  --team-id "$TEAM_ID" \
+                  --password "$APP_SPECIFIC_PASSWORD" \
+                  --output-format json | jq -r '.status')
+
+              case $STATUS in
+                  "Accepted")
+                      echo "Notarization succeeded!"
+                      break
+                      ;;
+                  "In Progress")
+                      echo "Notarization in progress... waiting 30 seconds"
+                      sleep 30
+                      ;;
+                  "Invalid"|"Rejected")
+                      echo "Notarization failed with status: $STATUS"
+                      xcrun notarytool log "$SUBMISSION_ID" \
+                          --apple-id "$APPLE_ID" \
+                          --team-id "$TEAM_ID" \
+                          --password "$APP_SPECIFIC_PASSWORD"
+                      exit 1
+                      ;;
+                  *)
+                      echo "Unknown status: $STATUS"
+                      exit 1
+                      ;;
+              esac
+          done
+
+          # Clean up
+          rm ignite-notarization.zip
+
+      - name: Create release archive and checksums
+        run: |
+          # Create zip archive
+          zip -q ignite-macos.zip ignite
+
+          # Generate checksums
+          shasum -a 256 ignite-macos.zip > SHA256.txt
+          shasum -a 512 ignite-macos.zip > SHA512.txt
+
+          # Display checksums
+          echo "SHA256:"
+          cat SHA256.txt
+          echo "SHA512:"
+          cat SHA512.txt
+
+      - name: Upload artifacts
+        id: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-artifacts
+          path: |
+            ignite-macos.zip
+            SHA256.txt
+            SHA512.txt
+            CHANGELOG.md
+            mix.exs
+          retention-days: 1
+
+  commit-and-release:
+    name: Commit and Release
+    needs: [check-release, build-macos]
+    if: always() && needs.check-release.outputs.should-release == 'true'
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download macOS artifacts
+        if: needs.build-macos.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-artifacts
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          # Add changed files
+          git add CHANGELOG.md mix.exs
+
+          # Check if there are changes to commit
+          if ! git diff --cached --quiet; then
+            git commit -m "[Release] Ignite ${{ needs.check-release.outputs.next-version }}"
+          else
+            echo "No changes to commit"
+          fi
+
+          # Create tag
+          git tag ${{ needs.check-release.outputs.next-version }}
+
+          # Push with retry logic
+          max_attempts=5
+          attempt=1
+          while [ $attempt -le $max_attempts ]; do
+            echo "Attempt $attempt of $max_attempts"
+            if git pull --rebase origin ${{ github.ref_name }}; then
+              if git push origin ${{ github.ref_name }} --tags; then
+                echo "Successfully pushed changes and tags"
+                break
+              fi
+            fi
+            echo "Push failed, retrying in 5 seconds..."
+            sleep 5
+            attempt=$((attempt + 1))
+          done
+
+          if [ $attempt -gt $max_attempts ]; then
+            echo "Failed to push after $max_attempts attempts"
+            exit 1
+          fi
+
+      - name: Create GitHub Release
+        if: needs.build-macos.result == 'success'
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: false
+          name: Ignite ${{ needs.check-release.outputs.next-version }}
+          tag_name: ${{ needs.check-release.outputs.next-version }}
+          body: ${{ needs.build-macos.outputs.release-notes }}
+          files: |
+            ignite-macos.zip
+            SHA256.txt
+            SHA512.txt

@@ -1,10 +1,12 @@
 defmodule Ignite.MixProject do
   use Mix.Project
 
+  @version "0.1.0"
+
   def project do
     [
       app: :ignite,
-      version: "0.1.0",
+      version: @version,
       elixir: "~> 1.15",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
@@ -84,8 +86,33 @@ defmodule Ignite.MixProject do
   defp releases do
     [
       ignite: [
-        steps: [:assemble],
-        include_executables_for: [:unix, :windows]
+        steps: [:assemble, &Burrito.wrap/1],
+        include_executables_for: [:unix, :windows],
+        strip_beams: [keep: ["Docs"]],
+        burrito: [
+          targets: [
+            macos_m1: [
+              os: :darwin,
+              cpu: :aarch64,
+              include_erts: true
+            ],
+            macos_intel: [
+              os: :darwin,
+              cpu: :x86_64,
+              include_erts: true
+            ],
+            linux: [
+              os: :linux,
+              cpu: :x86_64,
+              include_erts: true
+            ],
+            windows: [
+              os: :windows,
+              cpu: :x86_64,
+              include_erts: true
+            ]
+          ]
+        ]
       ]
     ]
   end
