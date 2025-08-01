@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 <!-- RELEASE NOTES START -->
+## [0.1.4] - 2025-08-01
+
+### <!-- 1 -->🐛 Bug Fixes
+- Improve release archive structure to avoid unnecessary nested folder by @pepicrft
+**Full Changelog**: https://github.com/tuist/ignite/compare/0.1.3...0.1.4
+<!-- RELEASE NOTES START -->
 ## [0.1.3] - 2025-08-01
 
 ### <!-- 1 -->🐛 Bug Fixes
