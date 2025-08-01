@@ -125,8 +125,13 @@ jobs:
           # Determine the directory where this script resides
           SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
           
-          # Execute the actual ignite binary
-          exec "$SCRIPT_DIR/bin/ignite" "$@"
+          # If no arguments provided, default to "start"
+          if [ $# -eq 0 ]; then
+            exec "$SCRIPT_DIR/bin/ignite" start
+          else
+            # Pass through any provided arguments
+            exec "$SCRIPT_DIR/bin/ignite" "$@"
+          fi
           EOF
           
           chmod +x ignite
