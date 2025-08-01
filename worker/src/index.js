@@ -57,7 +57,7 @@ const html = `<!DOCTYPE html>
         }
 
         header {
-            padding: 32px 0;
+            padding: 20px 0;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
@@ -71,15 +71,15 @@ const html = `<!DOCTYPE html>
         }
 
         .hero {
-            padding: 80px 0 60px;
+            padding: 40px 0 30px;
             text-align: center;
         }
 
         .hero h1 {
-            font-size: clamp(36px, 6vw, 72px);
+            font-size: clamp(32px, 5vw, 56px);
             font-weight: 800;
             line-height: 1.1;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
             letter-spacing: -0.03em;
             background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
             -webkit-background-clip: text;
@@ -88,18 +88,18 @@ const html = `<!DOCTYPE html>
         }
 
         .hero .subtitle {
-            font-size: clamp(18px, 2.5vw, 24px);
+            font-size: clamp(16px, 2vw, 20px);
             color: var(--text-secondary);
-            margin-bottom: 48px;
+            margin-bottom: 32px;
             font-weight: 400;
-            max-width: 600px;
+            max-width: 500px;
             margin-left: auto;
             margin-right: auto;
         }
 
         .terminal-container {
-            max-width: 700px;
-            margin: 0 auto 40px;
+            max-width: 600px;
+            margin: 0 auto 32px;
             position: relative;
         }
 
@@ -132,16 +132,16 @@ const html = `<!DOCTYPE html>
 
         .terminal-header {
             background: rgba(255, 255, 255, 0.05);
-            padding: 16px 20px;
+            padding: 12px 16px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             border-bottom: 1px solid var(--terminal-border);
         }
 
         .terminal-dot {
-            width: 12px;
-            height: 12px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
             background: var(--terminal-border);
         }
@@ -151,10 +151,10 @@ const html = `<!DOCTYPE html>
         .terminal-dot:nth-child(3) { background: #28ca42; }
 
         .terminal-body {
-            padding: 24px;
+            padding: 20px;
             font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', monospace;
-            font-size: 15px;
-            line-height: 1.6;
+            font-size: 14px;
+            line-height: 1.5;
         }
 
         .command-line {
@@ -183,8 +183,8 @@ const html = `<!DOCTYPE html>
 
         .cursor {
             display: inline-block;
-            width: 10px;
-            height: 20px;
+            width: 8px;
+            height: 16px;
             background: var(--terminal-text);
             animation: blink 1s infinite;
             margin-left: 2px;
@@ -216,17 +216,17 @@ const html = `<!DOCTYPE html>
 
         .features {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 24px;
-            margin-top: 60px;
-            margin-bottom: 60px;
-            max-width: 1000px;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+            margin-bottom: 40px;
+            max-width: 900px;
             margin-left: auto;
             margin-right: auto;
         }
 
         .feature {
-            padding: 24px;
+            padding: 20px;
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 12px;
@@ -241,8 +241,8 @@ const html = `<!DOCTYPE html>
         }
 
         .feature h3 {
-            font-size: 18px;
-            margin-bottom: 8px;
+            font-size: 16px;
+            margin-bottom: 6px;
             color: var(--text-primary);
         }
 
@@ -292,40 +292,48 @@ const html = `<!DOCTYPE html>
         }
 
         footer {
-            padding: 32px 0;
+            padding: 24px 0;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             text-align: center;
             color: var(--text-secondary);
-            font-size: 14px;
+            font-size: 13px;
         }
 
         @media (max-width: 768px) {
             .hero {
-                padding: 60px 0 40px;
+                padding: 30px 0 20px;
             }
             
             .hero h1 {
-                font-size: 32px;
+                font-size: 28px;
             }
             
             .hero .subtitle {
-                font-size: 16px;
-                margin-bottom: 32px;
+                font-size: 15px;
+                margin-bottom: 24px;
             }
             
             .terminal-body {
                 padding: 16px;
-                font-size: 13px;
+                font-size: 12px;
             }
             
             .features {
-                gap: 16px;
-                margin-top: 40px;
-                margin-bottom: 40px;
+                gap: 12px;
+                margin-top: 30px;
+                margin-bottom: 30px;
             }
             
             .feature {
-                padding: 20px;
+                padding: 16px;
+            }
+            
+            .feature h3 {
+                font-size: 15px;
+            }
+            
+            .feature p {
+                font-size: 13px;
             }
         }
     </style>
@@ -335,7 +343,7 @@ const html = `<!DOCTYPE html>
     
     <div class="container">
         <header>
-            <div class="logo">Ignite</div>
+            <div class="logo">🔥 Ignite</div>
         </header>
         
         <section class="hero">
