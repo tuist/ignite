@@ -150,34 +150,18 @@ fi
 
 print_status "Creating release archive..."
 
-# Create zip archive for notarization from inside the directory
-cd release-package
-zip -q -r --symlinks ../ignite-macos.zip .
-cd ..
-
-# Create tar.gz archive for distribution
-cd release-package
-tar -czf ../ignite-macos.tar.gz .
-cd ..
-
-# Generate checksums for the tar.gz (distribution file)
-shasum -a 256 ignite-macos.tar.gz > SHA256.txt
-shasum -a 512 ignite-macos.tar.gz > SHA512.txt
-
-# Display checksums
-echo "SHA256:"
-cat SHA256.txt
-echo "SHA512:"
-cat SHA512.txt
-
 if [ "$LOCAL_MODE" = "false" ]; then
     print_status "Notarizing release..."
 
     APPLE_ID="pedro@pepicrft.me"
     TEAM_ID="U6LC622NKF"
 
-    # Submit zip file for notarization
-    RAW_JSON=$(xcrun notarytool submit "ignite-macos.zip" \
+    # Create a zip with just the main executable for notarization
+    print_status "Creating notarization bundle..."
+    zip -j ignite-notarization.zip release-package/ignite
+
+    # Submit for notarization
+    RAW_JSON=$(xcrun notarytool submit "ignite-notarization.zip" \
         --apple-id "$APPLE_ID" \
         --team-id "$TEAM_ID" \
         --password "$APP_SPECIFIC_PASSWORD" \
@@ -217,9 +201,28 @@ if [ "$LOCAL_MODE" = "false" ]; then
                 ;;
         esac
     done
+    
+    # Clean up notarization zip
+    rm -f ignite-notarization.zip
 else
     print_status "Local mode: Skipping notarization"
 fi
+
+# Now create the distribution archive
+print_status "Creating distribution archive..."
+cd release-package
+tar -czf ../ignite-macos.tar.gz .
+cd ..
+
+# Generate checksums for the tar.gz (distribution file)
+shasum -a 256 ignite-macos.tar.gz > SHA256.txt
+shasum -a 512 ignite-macos.tar.gz > SHA512.txt
+
+# Display checksums
+echo "SHA256:"
+cat SHA256.txt
+echo "SHA512:"
+cat SHA512.txt
 
 # Clean up keychain
 if [ "$LOCAL_MODE" = "false" ] && [ -n "$KEYCHAIN_PATH" ]; then
@@ -229,7 +232,6 @@ fi
 
 # Clean up temporary files
 rm -rf release-package
-rm -f ignite-macos.zip  # Remove the zip file used for notarization
 
 print_status "Release build complete!"
 echo "Artifacts created:"
