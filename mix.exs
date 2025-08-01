@@ -86,33 +86,9 @@ defmodule Ignite.MixProject do
   defp releases do
     [
       ignite: [
-        steps: [:assemble, &Burrito.wrap/1],
+        steps: [:assemble],
         include_executables_for: [:unix, :windows],
-        strip_beams: [keep: ["Docs"]],
-        burrito: [
-          targets: [
-            macos_m1: [
-              os: :darwin,
-              cpu: :aarch64,
-              include_erts: true
-            ],
-            macos_intel: [
-              os: :darwin,
-              cpu: :x86_64,
-              include_erts: true
-            ],
-            linux: [
-              os: :linux,
-              cpu: :x86_64,
-              include_erts: true
-            ],
-            windows: [
-              os: :windows,
-              cpu: :x86_64,
-              include_erts: true
-            ]
-          ]
-        ]
+        strip_beams: [keep: ["Docs"]]
       ]
     ]
   end

@@ -95,138 +95,61 @@ jobs:
           mise install
           mix deps.get --only prod
 
-      - name: Build release with Burrito
+      - name: Build release
         id: build
         env:
           MIX_ENV: prod
-          BURRITO_TARGET: macos_m1
         run: |
           # Ensure assets are built for production
           mix assets.deploy
-
+          
           # Build the release
           mix release --overwrite
-
-          # Find the burrito executable
-          # Burrito might output to different locations depending on configuration
-          POSSIBLE_LOCATIONS=(
-            "_build/prod/rel/ignite/ignite"
-            "_build/prod/burrito_out/ignite_macos_m1"
-            "_build/prod/burrito_out/ignite"
-            "_build/prod/rel/burrito_out/ignite_macos_m1"
-            "_build/prod/rel/burrito_out/ignite"
-          )
-
-          BURRITO_OUTPUT=""
-          for location in "${POSSIBLE_LOCATIONS[@]}"; do
-            if [ -f "$location" ]; then
-              BURRITO_OUTPUT="$location"
-              echo "Burrito executable found at $BURRITO_OUTPUT"
-              break
-            fi
-          done
-
-          if [ -z "$BURRITO_OUTPUT" ]; then
-            echo "ERROR: Burrito executable not found"
-            echo "Searching for executable files in build directory:"
-            find _build -type f -perm +111 -name "*ignite*" 2>/dev/null || true
-            echo ""
-            echo "Full _build directory structure:"
-            find _build -type f -name "*" | head -50
+          
+          # Package the release
+          echo "Creating release archive..."
+          RELEASE_DIR="_build/prod/rel/ignite"
+          
+          # Create a standalone directory with the release
+          mkdir -p ignite-macos
+          cp -r $RELEASE_DIR/* ignite-macos/
+          
+          # Create a simple launcher script
+          cat > ignite << 'EOF'
+          #!/bin/bash
+          # Ignite CLI Launcher
+          
+          # Determine the directory where this script resides
+          SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+          
+          # Check if running from packaged release or development
+          if [ -d "$SCRIPT_DIR/ignite-macos" ]; then
+            # Running from extracted archive
+            exec "$SCRIPT_DIR/ignite-macos/bin/ignite" "$@"
+          elif [ -f "$SCRIPT_DIR/bin/ignite" ]; then
+            # Running from release directory
+            exec "$SCRIPT_DIR/bin/ignite" "$@"
+          else
+            echo "Error: Could not find ignite executable"
             exit 1
           fi
-
-          cp "$BURRITO_OUTPUT" ./ignite
-          chmod +x ./ignite
-
-          # Test the executable
-          echo "Testing executable..."
-          ./ignite --version || echo "Version command not available"
-
-      - name: Setup Keychain for signing
-        run: |
-          TMP_DIR=$(mktemp -d)
-          KEYCHAIN_PATH=$TMP_DIR/keychain.keychain
-          KEYCHAIN_PASSWORD=$(uuidgen)
-
-          # Create a new temporary keychain
-          security create-keychain -p $KEYCHAIN_PASSWORD $KEYCHAIN_PATH
-          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
-          security default-keychain -s $KEYCHAIN_PATH
-          security unlock-keychain -p $KEYCHAIN_PASSWORD $KEYCHAIN_PATH
-
-          # Import certificate
-          echo $BASE_64_DEVELOPER_ID_APPLICATION_CERTIFICATE | base64 --decode > $TMP_DIR/certificate.p12
-          security import $TMP_DIR/certificate.p12 -P $CERTIFICATE_PASSWORD -A
-
-          rm -rf $TMP_DIR
-
-      - name: Sign and notarize
-        run: |
-          APPLE_ID="pedro@pepicrft.me"
-          TEAM_ID='U6LC622NKF'
-          CERTIFICATE_NAME="Developer ID Application: Tuist GmbH (U6LC622NKF)"
-
-          # Sign the executable
-          /usr/bin/codesign --sign "$CERTIFICATE_NAME" --timestamp --options runtime --verbose ignite
-
-          # Create a zip for notarization
-          zip -q -r ignite-notarization.zip ignite
-
-          # Submit for notarization
-          RAW_JSON=$(xcrun notarytool submit "ignite-notarization.zip" \
-              --apple-id "$APPLE_ID" \
-              --team-id "$TEAM_ID" \
-              --password "$APP_SPECIFIC_PASSWORD" \
-              --output-format json)
-          echo "$RAW_JSON"
-          SUBMISSION_ID=$(echo "$RAW_JSON" | jq -r '.id')
-          echo "Submission ID: $SUBMISSION_ID"
-
-          # Wait for notarization
-          while true; do
-              STATUS=$(xcrun notarytool info "$SUBMISSION_ID" \
-                  --apple-id "$APPLE_ID" \
-                  --team-id "$TEAM_ID" \
-                  --password "$APP_SPECIFIC_PASSWORD" \
-                  --output-format json | jq -r '.status')
-
-              case $STATUS in
-                  "Accepted")
-                      echo "Notarization succeeded!"
-                      break
-                      ;;
-                  "In Progress")
-                      echo "Notarization in progress... waiting 30 seconds"
-                      sleep 30
-                      ;;
-                  "Invalid"|"Rejected")
-                      echo "Notarization failed with status: $STATUS"
-                      xcrun notarytool log "$SUBMISSION_ID" \
-                          --apple-id "$APPLE_ID" \
-                          --team-id "$TEAM_ID" \
-                          --password "$APP_SPECIFIC_PASSWORD"
-                      exit 1
-                      ;;
-                  *)
-                      echo "Unknown status: $STATUS"
-                      exit 1
-                      ;;
-              esac
-          done
-
-          # Clean up
-          rm ignite-notarization.zip
+          EOF
+          
+          chmod +x ignite
+          
+          # Test the release
+          echo "Testing release..."
+          $RELEASE_DIR/bin/ignite eval "IO.puts(:ignite |> Application.spec(:vsn))" || echo "Version check failed"
 
       - name: Create release archive and checksums
         run: |
-          # Create zip archive
-          zip -q ignite-macos.zip ignite
-
+          # Create tar.gz archive
+          tar -czf ignite-macos.tar.gz ignite-macos ignite
+          
           # Generate checksums
-          shasum -a 256 ignite-macos.zip > SHA256.txt
-          shasum -a 512 ignite-macos.zip > SHA512.txt
-
+          shasum -a 256 ignite-macos.tar.gz > SHA256.txt
+          shasum -a 512 ignite-macos.tar.gz > SHA512.txt
+          
           # Display checksums
           echo "SHA256:"
           cat SHA256.txt
@@ -239,7 +162,7 @@ jobs:
         with:
           name: macos-artifacts
           path: |
-            ignite-macos.zip
+            ignite-macos.tar.gz
             SHA256.txt
             SHA512.txt
             CHANGELOG.md
@@ -269,20 +192,20 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-
+          
           # Add changed files
           git add CHANGELOG.md mix.exs
-
+          
           # Check if there are changes to commit
           if ! git diff --cached --quiet; then
             git commit -m "[Release] Ignite ${{ needs.check-release.outputs.next-version }}"
           else
             echo "No changes to commit"
           fi
-
+          
           # Create tag
           git tag ${{ needs.check-release.outputs.next-version }}
-
+          
           # Push with retry logic
           max_attempts=5
           attempt=1
@@ -298,7 +221,7 @@ jobs:
             sleep 5
             attempt=$((attempt + 1))
           done
-
+          
           if [ $attempt -gt $max_attempts ]; then
             echo "Failed to push after $max_attempts attempts"
             exit 1
@@ -313,6 +236,6 @@ jobs:
           tag_name: ${{ needs.check-release.outputs.next-version }}
           body: ${{ needs.build-macos.outputs.release-notes }}
           files: |
-            ignite-macos.zip
+            ignite-macos.tar.gz
             SHA256.txt
             SHA512.txt
