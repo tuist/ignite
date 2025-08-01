@@ -1,6 +1,10 @@
-# CLAUDE.md
+# AGENT.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Cline (previously Claude Dev) when working with code in this repository.
+
+## Important Guidelines
+
+- **Always keep README.md up to date**: When making any changes to the project (features, configuration, setup instructions, etc.), ensure the README.md is updated to reflect those changes.
 
 ## Development Commands
 
