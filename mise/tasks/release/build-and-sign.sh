@@ -133,18 +133,30 @@ fi
 if [ "$LOCAL_MODE" = "false" ]; then
     print_status "Signing executables..."
 
-    # Only sign the main release binary
-    if [ -f "release-package/bin/ignite" ]; then
-        print_status "Signing bin/ignite..."
-        /usr/bin/codesign --force --sign "$CERTIFICATE_NAME" --timestamp --options runtime --verbose release-package/bin/ignite
-        
-        # Verify it was signed
-        print_status "Verifying signature..."
-        /usr/bin/codesign --verify --verbose release-package/bin/ignite
-    else
-        print_error "bin/ignite not found!"
-        exit 1
+    # Sign all executables in the release to avoid macOS security warnings
+    print_status "Finding and signing all executables..."
+    
+    # Sign all files in bin directory
+    find release-package/bin -type f -perm +111 | while read -r file; do
+        echo "Signing: $file"
+        /usr/bin/codesign --force --sign "$CERTIFICATE_NAME" --timestamp --options runtime --verbose "$file"
+    done
+    
+    # Sign all ERTS binaries (these are what trigger the malware warnings)
+    if [ -d "release-package/erts-"* ]; then
+        find release-package/erts-*/bin -type f -perm +111 | while read -r file; do
+            echo "Signing ERTS binary: $file"
+            /usr/bin/codesign --force --sign "$CERTIFICATE_NAME" --timestamp --options runtime --verbose "$file"
+        done
     fi
+    
+    # Sign any native libraries
+    find release-package -name "*.so" -o -name "*.dylib" | while read -r file; do
+        echo "Signing library: $file"
+        /usr/bin/codesign --force --sign "$CERTIFICATE_NAME" --timestamp --verbose "$file"
+    done
+    
+    print_status "All executables signed"
 else
     print_status "Local mode: Skipping code signing"
 fi
