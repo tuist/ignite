@@ -59,6 +59,7 @@ defmodule Ignite.MixProject do
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
       {:burrito, "~> 1.2.0"},
+      {:muontrap, "~> 1.5"},
       
       # Local dependencies
       {:sidekick, path: "sidekick"}

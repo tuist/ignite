@@ -16,7 +16,9 @@ defmodule Ignite.Application do
       # Start Sidekick for platform-specific operations
       sidekick_spec(),
       # Start to serve requests, typically the last entry
-      IgniteWeb.Endpoint
+      IgniteWeb.Endpoint,
+      # Launch browser after endpoint is started
+      browser_launcher_spec()
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
@@ -48,6 +50,22 @@ defmodule Ignite.Application do
     server_url = "#{host}:#{grpc_port}"
     
     {Sidekick, server_url: server_url, name: Ignite.Sidekick}
+  end
+
+  defp browser_launcher_spec do
+    # Only launch browser in development and when not in IEx
+    if Application.get_env(:ignite, :launch_browser, true) and 
+       Mix.env() != :test and
+       !IEx.started?() do
+      Ignite.BrowserLauncher
+    else
+      # Return a no-op child spec that immediately terminates
+      %{
+        id: :browser_launcher_noop,
+        start: {Task, :start_link, [fn -> :ok end]},
+        restart: :temporary
+      }
+    end
   end
 
   # Tell Phoenix to update the endpoint configuration
