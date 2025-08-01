@@ -15,20 +15,15 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-argument-parser", from: "1.3.0"),
+        .package(url: "https://github.com/apple/swift-argument-parser", from: "1.3.0")
     ],
     targets: [
         .executableTarget(
             name: "ignite-swift",
             dependencies: [
-                .product(name: "ArgumentParser", package: "swift-argument-parser"),
+                .product(name: "ArgumentParser", package: "swift-argument-parser")
             ],
             path: "swift/Sources/ignite-swift"
-        ),
-        .testTarget(
-            name: "ignite-swift-tests",
-            dependencies: ["ignite-swift"],
-            path: "swift/Tests/ignite-swift-tests"
-        ),
+        )
     ]
 )

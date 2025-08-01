@@ -50,6 +50,15 @@ MIX_ENV=prod mix compile
 # Ensure assets are built for production
 MIX_ENV=prod mix assets.deploy
 
+# Build Swift executable first
+print_status "Building Swift executable..."
+swift build -c release --product ignite-swift
+SWIFT_BINARY=".build/release/ignite-swift"
+if [ ! -f "$SWIFT_BINARY" ]; then
+    print_error "Swift build failed - ignite-swift binary not found at $SWIFT_BINARY"
+    exit 1
+fi
+
 # Build the release with Burrito
 print_status "Running mix release with Burrito..."
 MIX_ENV=prod BURRITO_TARGET=macos_arm mix release --overwrite
@@ -76,6 +85,10 @@ print_status "Found Burrito binary: $BURRITO_BINARY"
 # Copy the binary to current directory with simple name
 cp "$BURRITO_BINARY" ignite
 chmod +x ignite
+
+# Copy Swift binary as well
+cp "$SWIFT_BINARY" ignite-swift
+chmod +x ignite-swift
 
 # Ensure jq is available for JSON parsing
 if ! command -v jq &> /dev/null; then
@@ -124,23 +137,27 @@ if [ "$LOCAL_MODE" = "false" ]; then
     print_status "Verifying certificate..."
     security find-identity -v -p codesigning
 
-    print_status "Signing executable..."
+    print_status "Signing executables..."
 
-    # Sign the single Burrito executable
+    # Sign the Burrito executable
     /usr/bin/codesign --force --sign "$CERTIFICATE_NAME" --timestamp --options runtime --verbose ignite
+    
+    # Sign the Swift executable
+    /usr/bin/codesign --force --sign "$CERTIFICATE_NAME" --timestamp --options runtime --verbose ignite-swift
 
-    # Verify the signature
-    print_status "Verifying signature..."
+    # Verify the signatures
+    print_status "Verifying signatures..."
     /usr/bin/codesign --verify --deep --verbose ignite
+    /usr/bin/codesign --verify --deep --verbose ignite-swift
 
-    print_status "Executable signed successfully"
+    print_status "Executables signed successfully"
     
     # Notarize the executable if Apple ID credentials are available
     if [ -n "${APP_SPECIFIC_PASSWORD:-}" ]; then
         print_status "Notarizing executable..."
         
         # Create a zip for notarization (notarytool requires zip format)
-        zip -q -r --symlinks "notarization-bundle.zip" ignite
+        zip -q -r --symlinks "notarization-bundle.zip" ignite ignite-swift
         
         # Submit for notarization and get submission ID
         RAW_JSON=$(xcrun notarytool submit "notarization-bundle.zip" \
@@ -196,9 +213,9 @@ else
     print_status "Local mode: Skipping code signing and notarization"
 fi
 
-# Create the distribution archive with just the executable
+# Create the distribution archive with both executables
 print_status "Creating distribution archive..."
-tar -czf ignite-macos.tar.gz ignite
+tar -czf ignite-macos.tar.gz ignite ignite-swift
 
 # Generate checksums
 shasum -a 256 ignite-macos.tar.gz > SHA256.txt
@@ -217,11 +234,11 @@ if [ "$LOCAL_MODE" = "false" ] && [ -n "$KEYCHAIN_PATH" ]; then
 fi
 
 # Clean up temporary files
-rm -f ignite
+rm -f ignite ignite-swift
 rm -rf burrito_out
 
 print_status "Release build complete!"
 echo "Artifacts created:"
-echo "  - ignite-macos.tar.gz (single portable executable)"
+echo "  - ignite-macos.tar.gz (contains ignite and ignite-swift executables)"
 echo "  - SHA256.txt"
 echo "  - SHA512.txt"

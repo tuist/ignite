@@ -652,17 +652,22 @@ print_status "Installing to \$BIN_DIR/ignite..."
 # Create directories
 mkdir -p "\$BIN_DIR"
 
-# Move binary to installation directory
+# Move binaries to installation directory
 mv ignite "\$BIN_DIR/"
+if [ -f "ignite-swift" ]; then
+    mv ignite-swift "\$BIN_DIR/"
+fi
 
 # Remove quarantine attribute if present (for non-notarized binaries)
 if command -v xattr &> /dev/null; then
     print_status "Removing quarantine attributes..."
     xattr -d com.apple.quarantine "\$BIN_DIR/ignite" 2>/dev/null || true
+    [ -f "\$BIN_DIR/ignite-swift" ] && xattr -d com.apple.quarantine "\$BIN_DIR/ignite-swift" 2>/dev/null || true
 fi
 
-# Make sure it's executable
+# Make sure they're executable
 chmod +x "\$BIN_DIR/ignite"
+[ -f "\$BIN_DIR/ignite-swift" ] && chmod +x "\$BIN_DIR/ignite-swift"
 
 # Clean up
 cd - > /dev/null
