@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 <!-- RELEASE NOTES START -->
+## [0.13.1] - 2025-08-01
+
+### <!-- 1 -->🐛 Bug Fixes
+- Remove Mix.env() usage for production compatibility by @pepicrft
+**Full Changelog**: https://github.com/tuist/ignite/compare/0.13.0...0.13.1
+<!-- RELEASE NOTES START -->
 ## [0.13.0] - 2025-08-01
 
 ### <!-- 0 -->⛰️  Features
