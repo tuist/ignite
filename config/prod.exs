@@ -16,5 +16,8 @@ config :swoosh, local: false
 # Do not print debug messages in production
 config :logger, level: :info
 
+# Don't launch browser in production
+config :ignite, :launch_browser, false
+
 # Runtime production configuration, including reading
 # of environment variables, is done on config/runtime.exs.

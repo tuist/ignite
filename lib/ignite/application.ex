@@ -53,10 +53,11 @@ defmodule Ignite.Application do
   end
 
   defp browser_launcher_spec do
-    # Only launch browser in development and when not in IEx
-    if Application.get_env(:ignite, :launch_browser, true) and 
-       Mix.env() != :test and
-       !IEx.started?() do
+    # Only launch browser when configured and not in IEx
+    launch_browser = Application.get_env(:ignite, :launch_browser, true)
+    in_iex = Code.ensure_loaded?(IEx) and IEx.started?()
+    
+    if launch_browser and not in_iex do
       Ignite.BrowserLauncher
     else
       # Return a no-op child spec that immediately terminates

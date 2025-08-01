@@ -23,7 +23,7 @@ defmodule Ignite.BrowserLauncher do
   @impl true
   def init(opts) do
     # Don't launch in test environment
-    if Mix.env() == :test do
+    if Application.get_env(:ignite, :env) == :test do
       :ignore
     else
       # Wait a bit for the server to be ready
