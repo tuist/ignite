@@ -3,6 +3,93 @@
 All notable changes to this project will be documented in this file.
 
 <!-- RELEASE NOTES START -->
+## [0.4.0] - 2025-08-01
+
+### <!-- 0 -->⛰️  Features
+- Remove notarization as it's not needed for CLI tools by @pepicrft
+**Full Changelog**: https://github.com/tuist/ignite/compare/0.3.11...0.4.0
+<!-- RELEASE NOTES START -->
+## [0.3.11] - 2025-08-01
+
+### <!-- 1 -->🐛 Bug Fixes
+- Only sign and notarize the main binary executable by @pepicrft
+**Full Changelog**: https://github.com/tuist/ignite/compare/0.3.10...0.3.11
+<!-- RELEASE NOTES START -->
+## [0.3.10] - 2025-08-01
+
+### <!-- 1 -->🐛 Bug Fixes
+- Sign actual binaries instead of wrapper script and notarize entire package by @pepicrft
+**Full Changelog**: https://github.com/tuist/ignite/compare/0.3.9...0.3.10
+<!-- RELEASE NOTES START -->
+## [0.3.9] - 2025-08-01
+
+### <!-- 1 -->🐛 Bug Fixes
+- Only notarize the main executable, not the entire package by @pepicrft
+**Full Changelog**: https://github.com/tuist/ignite/compare/0.3.8...0.3.9
+<!-- RELEASE NOTES START -->
+## [0.3.8] - 2025-08-01
+
+### <!-- 1 -->🐛 Bug Fixes
+- Use zip format for notarization while keeping tar.gz for distribution by @pepicrft
+**Full Changelog**: https://github.com/tuist/ignite/compare/0.3.7...0.3.8
+<!-- RELEASE NOTES START -->
+## [0.3.7] - 2025-08-01
+
+### <!-- 1 -->🐛 Bug Fixes
+- Update keychain setup to match Tuist's approach by @pepicrft
+**Full Changelog**: https://github.com/tuist/ignite/compare/0.3.6...0.3.7
+<!-- RELEASE NOTES START -->
+## [0.3.6] - 2025-08-01
+
+### <!-- 1 -->🐛 Bug Fixes
+- Ensure SOPS age key is properly set up in CI and add local mode to release script by @pepicrft
+**Full Changelog**: https://github.com/tuist/ignite/compare/0.3.5...0.3.6
+<!-- RELEASE NOTES START -->
+## [0.3.5] - 2025-08-01
+
+### <!-- 1 -->🐛 Bug Fixes
+- Handle empty keychain list in CI environment by @pepicrft
+**Full Changelog**: https://github.com/tuist/ignite/compare/0.3.4...0.3.5
+<!-- RELEASE NOTES START -->
+## [0.3.4] - 2025-08-01
+
+### <!-- 1 -->🐛 Bug Fixes
+- Add postinstall hook to setup dependencies by @pepicrft
+**Full Changelog**: https://github.com/tuist/ignite/compare/0.3.3...0.3.4
+<!-- RELEASE NOTES START -->
+## [0.3.3] - 2025-08-01
+
+### <!-- 4 -->🔨 Refactor
+- Move release build logic to mise task for better environment handling by @pepicrft
+**Full Changelog**: https://github.com/tuist/ignite/compare/0.3.2...0.3.3
+<!-- RELEASE NOTES START -->
+## [0.3.2] - 2025-08-01
+
+### <!-- 1 -->🐛 Bug Fixes
+- Ensure encrypted environment variables are available in signing/notarization steps by @pepicrft
+**Full Changelog**: https://github.com/tuist/ignite/compare/0.3.1...0.3.2
+<!-- RELEASE NOTES START -->
+## [0.3.1] - 2025-08-01
+
+### <!-- 2 -->📚 Documentation
+- Update AGENT.md to include guideline about keeping README up to date by @pepicrft
+**Full Changelog**: https://github.com/tuist/ignite/compare/0.3.0...0.3.1
+<!-- RELEASE NOTES START -->
+## [0.3.0] - 2025-08-01
+
+### <!-- 0 -->⛰️  Features
+- Make ignite executable start by default without arguments by @pepicrft
+
+### <!-- 1 -->🐛 Bug Fixes
+- Use environment variables for secrets in release workflow by @pepicrft- Correctly reference GitHub secrets in release workflow by @pepicrft
+**Full Changelog**: https://github.com/tuist/ignite/compare/0.2.0...0.3.0
+<!-- RELEASE NOTES START -->
+## [0.2.0] - 2025-08-01
+
+### <!-- 0 -->⛰️  Features
+- Add macOS code signing and notarization to releases by @pepicrft
+**Full Changelog**: https://github.com/tuist/ignite/compare/0.1.4...0.2.0
+<!-- RELEASE NOTES START -->
 ## [0.1.4] - 2025-08-01
 
 ### <!-- 1 -->🐛 Bug Fixes
