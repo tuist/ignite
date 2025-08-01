@@ -66,9 +66,6 @@ jobs:
     runs-on: macos-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      CERTIFICATE_PASSWORD: ${{ secrets.CERTIFICATE_PASSWORD }}
-      APP_SPECIFIC_PASSWORD: ${{ secrets.APP_SPECIFIC_PASSWORD }}
-      BASE_64_DEVELOPER_ID_APPLICATION_CERTIFICATE: ${{ secrets.BASE_64_DEVELOPER_ID_APPLICATION_CERTIFICATE }}
     outputs:
       artifacts-uploaded: ${{ steps.upload.outputs.uploaded }}
       release-notes: ${{ steps.release-notes.outputs.RELEASE_NOTES }}
@@ -156,8 +153,8 @@ jobs:
           security unlock-keychain -p $KEYCHAIN_PASSWORD $KEYCHAIN_PATH
           
           # Import certificate
-          echo $BASE_64_DEVELOPER_ID_APPLICATION_CERTIFICATE | base64 --decode > $TMP_DIR/certificate.p12
-          security import $TMP_DIR/certificate.p12 -P $CERTIFICATE_PASSWORD -A
+          echo "${{ secrets.BASE_64_DEVELOPER_ID_APPLICATION_CERTIFICATE }}" | base64 --decode > $TMP_DIR/certificate.p12
+          security import $TMP_DIR/certificate.p12 -P "${{ secrets.CERTIFICATE_PASSWORD }}" -A
           
           rm -rf $TMP_DIR
 
@@ -216,7 +213,7 @@ jobs:
           RAW_JSON=$(xcrun notarytool submit "ignite-macos.tar.gz" \
               --apple-id "$APPLE_ID" \
               --team-id "$TEAM_ID" \
-              --password "$APP_SPECIFIC_PASSWORD" \
+              --password "${{ secrets.APP_SPECIFIC_PASSWORD }}" \
               --output-format json)
           echo "$RAW_JSON"
           SUBMISSION_ID=$(echo "$RAW_JSON" | jq -r '.id')
@@ -227,7 +224,7 @@ jobs:
               STATUS=$(xcrun notarytool info "$SUBMISSION_ID" \
                   --apple-id "$APPLE_ID" \
                   --team-id "$TEAM_ID" \
-                  --password "$APP_SPECIFIC_PASSWORD" \
+                  --password "${{ secrets.APP_SPECIFIC_PASSWORD }}" \
                   --output-format json | jq -r '.status')
               
               case $STATUS in
@@ -244,7 +241,7 @@ jobs:
                       xcrun notarytool log "$SUBMISSION_ID" \
                           --apple-id "$APPLE_ID" \
                           --team-id "$TEAM_ID" \
-                          --password "$APP_SPECIFIC_PASSWORD"
+                          --password "${{ secrets.APP_SPECIFIC_PASSWORD }}"
                       exit 1
                       ;;
                   *)
