@@ -93,7 +93,12 @@ defmodule Ignite.MixProject do
             macos_arm: [os: :darwin, cpu: :aarch64],
             linux: [os: :linux, cpu: :x86_64],
             windows: [os: :windows, cpu: :x86_64]
-          ]
+          ],
+          # Configure Burrito to use our CLI module
+          erts_source: :ghcup,
+          app: :ignite,
+          module: Ignite.CLI,
+          function: :main
         ]
       ]
     ]
