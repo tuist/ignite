@@ -92,64 +92,56 @@ print_status "Testing release..."
 
 cd ..
 
+CERTIFICATE_NAME="Developer ID Application: Tuist GmbH (U6LC622NKF)"
+
 if [ "$LOCAL_MODE" = "false" ]; then
     print_status "Setting up keychain for signing..."
 
-    # Create keychain for signing
-    KEYCHAIN_PATH="${RUNNER_TEMP:-/tmp}/app-signing.keychain-db"
+    # Create keychain for signing (following Tuist's approach)
+    KEYCHAIN_PATH="${RUNNER_TEMP:-/tmp}/keychain.keychain"
     KEYCHAIN_PASSWORD=$(uuidgen)
-    CERTIFICATE_NAME="Developer ID Application: Tuist GmbH (U6LC622NKF)"
 
     # Create and configure keychain
+    print_status "Creating temporary keychain..."
     security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
     security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+    security default-keychain -s "$KEYCHAIN_PATH"
     security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
 
-    # Add to keychain search list
-    EXISTING_KEYCHAINS=$(security list-keychains -d user | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | tr '\n' ' ')
-    if [ -n "$EXISTING_KEYCHAINS" ]; then
-        security list-keychains -d user -s "$KEYCHAIN_PATH" $EXISTING_KEYCHAINS
-    else
-        security list-keychains -d user -s "$KEYCHAIN_PATH"
-    fi
-    security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-
-    # Import certificate
+    # Import certificate directly without specifying keychain (like Tuist)
     print_status "Importing certificate..."
     CERT_PATH="${RUNNER_TEMP:-/tmp}/certificate.p12"
     echo $BASE_64_DEVELOPER_ID_APPLICATION_CERTIFICATE | base64 --decode > "$CERT_PATH"
-    security import "$CERT_PATH" -P "$CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+    security import "$CERT_PATH" -P "$CERTIFICATE_PASSWORD" -A
     rm -f "$CERT_PATH"
 
     # Verify certificate is available
     print_status "Verifying certificate..."
-    security find-identity -v -p codesigning "$KEYCHAIN_PATH"
+    security find-identity -v -p codesigning
 else
     print_status "Local mode: Using existing keychain and certificates"
-    CERTIFICATE_NAME="Developer ID Application: Tuist GmbH (U6LC622NKF)"
-    KEYCHAIN_PATH=""
 fi
 
 if [ "$LOCAL_MODE" = "false" ]; then
     print_status "Signing executables..."
 
-    # Sign the main ignite wrapper
-    /usr/bin/codesign --keychain "$KEYCHAIN_PATH" --sign "$CERTIFICATE_NAME" --timestamp --options runtime --verbose release-package/ignite
+    # Sign the main ignite wrapper (without specifying keychain like Tuist)
+    /usr/bin/codesign --sign "$CERTIFICATE_NAME" --timestamp --options runtime --verbose release-package/ignite
 
     # Sign the actual Elixir release binary
-    /usr/bin/codesign --keychain "$KEYCHAIN_PATH" --sign "$CERTIFICATE_NAME" --timestamp --options runtime --verbose release-package/bin/ignite
+    /usr/bin/codesign --sign "$CERTIFICATE_NAME" --timestamp --options runtime --verbose release-package/bin/ignite
 
     # Sign any other executables in bin directory
     find release-package/bin -type f -perm +111 | while read -r file; do
         echo "Signing: $file"
-        /usr/bin/codesign --keychain "$KEYCHAIN_PATH" --sign "$CERTIFICATE_NAME" --timestamp --options runtime --verbose "$file" || true
+        /usr/bin/codesign --sign "$CERTIFICATE_NAME" --timestamp --options runtime --verbose "$file" || true
     done
 
     # Sign ERTS binaries
     if [ -d "release-package/erts-"* ]; then
         find release-package/erts-*/bin -type f -perm +111 | while read -r file; do
             echo "Signing ERTS binary: $file"
-            /usr/bin/codesign --keychain "$KEYCHAIN_PATH" --sign "$CERTIFICATE_NAME" --timestamp --options runtime --verbose "$file" || true
+            /usr/bin/codesign --sign "$CERTIFICATE_NAME" --timestamp --options runtime --verbose "$file" || true
         done
     fi
 else
@@ -225,8 +217,9 @@ else
 fi
 
 # Clean up keychain
-if [ "$LOCAL_MODE" = "false" ]; then
-    security delete-keychain "$KEYCHAIN_PATH"
+if [ "$LOCAL_MODE" = "false" ] && [ -n "$KEYCHAIN_PATH" ]; then
+    print_status "Cleaning up keychain..."
+    security delete-keychain "$KEYCHAIN_PATH" || true
 fi
 
 # Clean up temporary files
