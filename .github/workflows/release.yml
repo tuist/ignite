@@ -66,6 +66,7 @@ jobs:
     runs-on: macos-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      MISE_SOPS_AGE_KEY: ${{ secrets.MISE_SOPS_AGE_KEY }}
     outputs:
       artifacts-uploaded: ${{ steps.upload.outputs.uploaded }}
       release-notes: ${{ steps.release-notes.outputs.RELEASE_NOTES }}
@@ -74,6 +75,12 @@ jobs:
         with:
           fetch-depth: 0
       - uses: jdx/mise-action@v2
+
+      - name: Setup SOPS age key
+        run: |
+          mkdir -p ~/.config/mise
+          echo "$MISE_SOPS_AGE_KEY" > ~/.config/mise/tuist-ignite-age.txt
+          chmod 600 ~/.config/mise/tuist-ignite-age.txt
 
       - name: Get release notes
         id: release-notes
@@ -89,6 +96,11 @@ jobs:
 
       - name: Update CHANGELOG.md
         run: git-cliff --bump -o CHANGELOG.md
+
+      - name: Verify environment setup
+        run: |
+          echo "Checking environment variables..."
+          mise exec -- bash -c 'if [ -n "$CERTIFICATE_PASSWORD" ] && [ -n "$APP_SPECIFIC_PASSWORD" ] && [ -n "$BASE_64_DEVELOPER_ID_APPLICATION_CERTIFICATE" ]; then echo "✓ All environment variables are loaded"; else echo "✗ Environment variables missing"; fi'
 
       - name: Build, sign, and notarize release
         run: mise run release:build-and-sign

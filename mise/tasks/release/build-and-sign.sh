@@ -19,13 +19,31 @@ print_error() {
 # Ensure we're in the project root
 cd "${MISE_PROJECT_ROOT}"
 
+# Check if running locally (not in CI)
+if [ -z "${CI:-}" ]; then
+    print_status "Running in local mode - skipping keychain operations"
+    LOCAL_MODE=true
+else
+    LOCAL_MODE=false
+fi
+
 # Ensure environment is set up
 if [ -z "${CERTIFICATE_PASSWORD:-}" ] || [ -z "${APP_SPECIFIC_PASSWORD:-}" ] || [ -z "${BASE_64_DEVELOPER_ID_APPLICATION_CERTIFICATE:-}" ]; then
     print_error "Required environment variables are not set. Please ensure .env.json is properly configured."
+    print_error "CERTIFICATE_PASSWORD: ${CERTIFICATE_PASSWORD:+[SET]}${CERTIFICATE_PASSWORD:-[NOT SET]}"
+    print_error "APP_SPECIFIC_PASSWORD: ${APP_SPECIFIC_PASSWORD:+[SET]}${APP_SPECIFIC_PASSWORD:-[NOT SET]}"
+    print_error "BASE_64_DEVELOPER_ID_APPLICATION_CERTIFICATE: ${BASE_64_DEVELOPER_ID_APPLICATION_CERTIFICATE:+[SET]}${BASE_64_DEVELOPER_ID_APPLICATION_CERTIFICATE:-[NOT SET]}"
     exit 1
 fi
 
 print_status "Building release..."
+
+# Clean previous builds
+rm -rf _build/prod
+
+# Get dependencies and compile
+MIX_ENV=prod mix deps.get
+MIX_ENV=prod mix compile
 
 # Ensure assets are built for production
 MIX_ENV=prod mix assets.deploy
@@ -74,58 +92,68 @@ print_status "Testing release..."
 
 cd ..
 
-print_status "Setting up keychain for signing..."
+if [ "$LOCAL_MODE" = "false" ]; then
+    print_status "Setting up keychain for signing..."
 
-# Create keychain for signing
-KEYCHAIN_PATH="${RUNNER_TEMP:-/tmp}/app-signing.keychain-db"
-KEYCHAIN_PASSWORD=$(uuidgen)
-CERTIFICATE_NAME="Developer ID Application: Tuist GmbH (U6LC622NKF)"
+    # Create keychain for signing
+    KEYCHAIN_PATH="${RUNNER_TEMP:-/tmp}/app-signing.keychain-db"
+    KEYCHAIN_PASSWORD=$(uuidgen)
+    CERTIFICATE_NAME="Developer ID Application: Tuist GmbH (U6LC622NKF)"
 
-# Create and configure keychain
-security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
-security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+    # Create and configure keychain
+    security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+    security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+    security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
 
-# Add to keychain search list
-EXISTING_KEYCHAINS=$(security list-keychains -d user | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | tr '\n' ' ')
-if [ -n "$EXISTING_KEYCHAINS" ]; then
-    security list-keychains -d user -s "$KEYCHAIN_PATH" $EXISTING_KEYCHAINS
+    # Add to keychain search list
+    EXISTING_KEYCHAINS=$(security list-keychains -d user | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | tr '\n' ' ')
+    if [ -n "$EXISTING_KEYCHAINS" ]; then
+        security list-keychains -d user -s "$KEYCHAIN_PATH" $EXISTING_KEYCHAINS
+    else
+        security list-keychains -d user -s "$KEYCHAIN_PATH"
+    fi
+    security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+    # Import certificate
+    print_status "Importing certificate..."
+    CERT_PATH="${RUNNER_TEMP:-/tmp}/certificate.p12"
+    echo $BASE_64_DEVELOPER_ID_APPLICATION_CERTIFICATE | base64 --decode > "$CERT_PATH"
+    security import "$CERT_PATH" -P "$CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+    rm -f "$CERT_PATH"
+
+    # Verify certificate is available
+    print_status "Verifying certificate..."
+    security find-identity -v -p codesigning "$KEYCHAIN_PATH"
 else
-    security list-keychains -d user -s "$KEYCHAIN_PATH"
+    print_status "Local mode: Using existing keychain and certificates"
+    CERTIFICATE_NAME="Developer ID Application: Tuist GmbH (U6LC622NKF)"
+    KEYCHAIN_PATH=""
 fi
-security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
 
-# Import certificate
-print_status "Importing certificate..."
-CERT_PATH="${RUNNER_TEMP:-/tmp}/certificate.p12"
-echo $BASE_64_DEVELOPER_ID_APPLICATION_CERTIFICATE | base64 --decode > "$CERT_PATH"
-security import "$CERT_PATH" -P "$CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
-rm -f "$CERT_PATH"
+if [ "$LOCAL_MODE" = "false" ]; then
+    print_status "Signing executables..."
 
-# Verify certificate is available
-print_status "Verifying certificate..."
-security find-identity -v -p codesigning "$KEYCHAIN_PATH"
+    # Sign the main ignite wrapper
+    /usr/bin/codesign --keychain "$KEYCHAIN_PATH" --sign "$CERTIFICATE_NAME" --timestamp --options runtime --verbose release-package/ignite
 
-print_status "Signing executables..."
+    # Sign the actual Elixir release binary
+    /usr/bin/codesign --keychain "$KEYCHAIN_PATH" --sign "$CERTIFICATE_NAME" --timestamp --options runtime --verbose release-package/bin/ignite
 
-# Sign the main ignite wrapper
-/usr/bin/codesign --keychain "$KEYCHAIN_PATH" --sign "$CERTIFICATE_NAME" --timestamp --options runtime --verbose release-package/ignite
-
-# Sign the actual Elixir release binary
-/usr/bin/codesign --keychain "$KEYCHAIN_PATH" --sign "$CERTIFICATE_NAME" --timestamp --options runtime --verbose release-package/bin/ignite
-
-# Sign any other executables in bin directory
-find release-package/bin -type f -perm +111 | while read -r file; do
-    echo "Signing: $file"
-    /usr/bin/codesign --keychain "$KEYCHAIN_PATH" --sign "$CERTIFICATE_NAME" --timestamp --options runtime --verbose "$file" || true
-done
-
-# Sign ERTS binaries
-if [ -d "release-package/erts-"* ]; then
-    find release-package/erts-*/bin -type f -perm +111 | while read -r file; do
-        echo "Signing ERTS binary: $file"
+    # Sign any other executables in bin directory
+    find release-package/bin -type f -perm +111 | while read -r file; do
+        echo "Signing: $file"
         /usr/bin/codesign --keychain "$KEYCHAIN_PATH" --sign "$CERTIFICATE_NAME" --timestamp --options runtime --verbose "$file" || true
     done
+
+    # Sign ERTS binaries
+    if [ -d "release-package/erts-"* ]; then
+        find release-package/erts-*/bin -type f -perm +111 | while read -r file; do
+            echo "Signing ERTS binary: $file"
+            /usr/bin/codesign --keychain "$KEYCHAIN_PATH" --sign "$CERTIFICATE_NAME" --timestamp --options runtime --verbose "$file" || true
+        done
+    fi
+else
+    print_status "Local mode: Skipping code signing"
 fi
 
 print_status "Creating release archive..."
@@ -145,55 +173,61 @@ cat SHA256.txt
 echo "SHA512:"
 cat SHA512.txt
 
-print_status "Notarizing release..."
+if [ "$LOCAL_MODE" = "false" ]; then
+    print_status "Notarizing release..."
 
-APPLE_ID="pedro@pepicrft.me"
-TEAM_ID="U6LC622NKF"
+    APPLE_ID="pedro@pepicrft.me"
+    TEAM_ID="U6LC622NKF"
 
-# Submit for notarization
-RAW_JSON=$(xcrun notarytool submit "ignite-macos.tar.gz" \
-    --apple-id "$APPLE_ID" \
-    --team-id "$TEAM_ID" \
-    --password "$APP_SPECIFIC_PASSWORD" \
-    --output-format json)
-echo "$RAW_JSON"
-SUBMISSION_ID=$(echo "$RAW_JSON" | jq -r ".id")
-echo "Submission ID: $SUBMISSION_ID"
-
-# Wait for notarization
-while true; do
-    STATUS=$(xcrun notarytool info "$SUBMISSION_ID" \
+    # Submit for notarization
+    RAW_JSON=$(xcrun notarytool submit "ignite-macos.tar.gz" \
         --apple-id "$APPLE_ID" \
         --team-id "$TEAM_ID" \
         --password "$APP_SPECIFIC_PASSWORD" \
-        --output-format json | jq -r ".status")
+        --output-format json)
+    echo "$RAW_JSON"
+    SUBMISSION_ID=$(echo "$RAW_JSON" | jq -r ".id")
+    echo "Submission ID: $SUBMISSION_ID"
 
-    case $STATUS in
-        "Accepted")
-            print_status "Notarization succeeded!"
-            break
-            ;;
-        "In Progress")
-            echo "Notarization in progress... waiting 30 seconds"
-            sleep 30
-            ;;
-        "Invalid"|"Rejected")
-            print_error "Notarization failed with status: $STATUS"
-            xcrun notarytool log "$SUBMISSION_ID" \
-                --apple-id "$APPLE_ID" \
-                --team-id "$TEAM_ID" \
-                --password "$APP_SPECIFIC_PASSWORD"
-            exit 1
-            ;;
-        *)
-            print_error "Unknown status: $STATUS"
-            exit 1
-            ;;
-    esac
-done
+    # Wait for notarization
+    while true; do
+        STATUS=$(xcrun notarytool info "$SUBMISSION_ID" \
+            --apple-id "$APPLE_ID" \
+            --team-id "$TEAM_ID" \
+            --password "$APP_SPECIFIC_PASSWORD" \
+            --output-format json | jq -r ".status")
+
+        case $STATUS in
+            "Accepted")
+                print_status "Notarization succeeded!"
+                break
+                ;;
+            "In Progress")
+                echo "Notarization in progress... waiting 30 seconds"
+                sleep 30
+                ;;
+            "Invalid"|"Rejected")
+                print_error "Notarization failed with status: $STATUS"
+                xcrun notarytool log "$SUBMISSION_ID" \
+                    --apple-id "$APPLE_ID" \
+                    --team-id "$TEAM_ID" \
+                    --password "$APP_SPECIFIC_PASSWORD"
+                exit 1
+                ;;
+            *)
+                print_error "Unknown status: $STATUS"
+                exit 1
+                ;;
+        esac
+    done
+else
+    print_status "Local mode: Skipping notarization"
+fi
 
 # Clean up keychain
-security delete-keychain "$KEYCHAIN_PATH"
+if [ "$LOCAL_MODE" = "false" ]; then
+    security delete-keychain "$KEYCHAIN_PATH"
+fi
 
 # Clean up temporary files
 rm -rf release-package
