@@ -26,9 +26,26 @@ defmodule Ignite.Application do
   end
 
   defp sidekick_spec do
-    # Get the Sidekick server URL from config or environment
-    server_url = System.get_env("SIDEKICK_URL") || 
-                 Application.get_env(:ignite, :sidekick_url, "localhost:50051")
+    # Use the same host configuration as the Phoenix endpoint
+    endpoint_config = Application.get_env(:ignite, IgniteWeb.Endpoint, [])
+    
+    # Get the URL configuration
+    url_config = endpoint_config[:url] || []
+    host = url_config[:host] || "localhost"
+    
+    # Get the base port from HTTP/HTTPS config
+    http_config = endpoint_config[:http] || []
+    https_config = endpoint_config[:https] || []
+    base_port = http_config[:port] || https_config[:port] || 4000
+    
+    # For gRPC, we'll use the base port + 1
+    grpc_port = if is_binary(base_port) do
+      String.to_integer(System.get_env("PORT", "4000")) + 1
+    else
+      base_port + 1
+    end
+    
+    server_url = "#{host}:#{grpc_port}"
     
     {Sidekick, server_url: server_url, name: Ignite.Sidekick}
   end
