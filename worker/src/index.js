@@ -3,8 +3,32 @@ const html = `<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ignite - App Development in the AI World</title>
-    <meta name="description" content="A web-based coding experience for apps. Create new projects or use existing ones.">
+    <title>Ignite - Apple App Development in the AI World | by Tuist</title>
+    <meta name="description" content="Build Apple apps with AI-powered development tools. Web-based coding experience that helps you ignite your ideas and turn them into reality. Install with one command.">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://ignite.tuist.dev/">
+    <meta property="og:title" content="Ignite - Apple App Development in the AI World">
+    <meta property="og:description" content="Build Apple apps with AI-powered development tools. Web-based coding experience that helps you ignite your ideas and turn them into reality.">
+    <meta property="og:image" content="https://ignite.tuist.dev/og.jpeg">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://ignite.tuist.dev/">
+    <meta property="twitter:title" content="Ignite - Apple App Development in the AI World">
+    <meta property="twitter:description" content="Build Apple apps with AI-powered development tools. Web-based coding experience that helps you ignite your ideas and turn them into reality.">
+    <meta property="twitter:image" content="https://ignite.tuist.dev/og.jpeg">
+    
+    <!-- Additional SEO tags -->
+    <meta name="keywords" content="Apple app development, AI development tools, iOS development, macOS development, web-based IDE, Tuist, Swift development">
+    <meta name="author" content="Tuist">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://ignite.tuist.dev/">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
     
     <style>
         :root {
@@ -251,12 +275,37 @@ const html = `<!DOCTYPE html>
             display: flex;
             flex-direction: column;
             min-height: 160px;
+            transform-style: preserve-3d;
+            transform: perspective(1000px);
+        }
+
+        .feature::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(
+                800px circle at var(--mouse-x) var(--mouse-y), 
+                rgba(255, 255, 255, 0.06),
+                transparent 40%
+            );
+            border-radius: 12px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
         }
 
         .feature:hover {
             background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(255, 255, 255, 0.2);
-            transform: translateY(-4px);
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: perspective(1000px) rotateX(var(--rotation-x)) rotateY(var(--rotation-y));
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .feature:hover::before {
+            opacity: 1;
         }
 
         .feature h3 {
@@ -290,6 +339,18 @@ const html = `<!DOCTYPE html>
         .feature.paid {
             background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(139, 92, 246, 0.05));
             border-color: rgba(124, 58, 237, 0.3);
+        }
+
+        .feature.paid:hover {
+            box-shadow: 0 10px 40px rgba(124, 58, 237, 0.15);
+        }
+
+        .feature.paid::before {
+            background: radial-gradient(
+                800px circle at var(--mouse-x) var(--mouse-y), 
+                rgba(124, 58, 237, 0.08),
+                transparent 40%
+            );
         }
         
         .powered-by {
@@ -495,6 +556,34 @@ const html = `<!DOCTYPE html>
                 }, 2000);
             });
         }
+
+        // Add tilt effect to feature cards
+        document.addEventListener('DOMContentLoaded', () => {
+            const features = document.querySelectorAll('.feature');
+            
+            features.forEach(feature => {
+                feature.addEventListener('mousemove', (e) => {
+                    const rect = feature.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    
+                    const rotateX = (y - centerY) / centerY * -10;
+                    const rotateY = (x - centerX) / centerX * 10;
+                    
+                    feature.style.setProperty('--rotation-x', rotateX + 'deg');
+                    feature.style.setProperty('--rotation-y', rotateY + 'deg');
+                    feature.style.setProperty('--mouse-x', x + 'px');
+                    feature.style.setProperty('--mouse-y', y + 'px');
+                });
+                
+                feature.addEventListener('mouseleave', () => {
+                    feature.style.setProperty('--rotation-x', '0deg');
+                    feature.style.setProperty('--rotation-y', '0deg');
+                });
+            });
+        });
     </script>
 </body>
 </html>`;
@@ -574,6 +663,12 @@ else
     sudo mv ignite /usr/local/bin/
 fi
 
+# Remove quarantine attribute if present (for non-notarized binaries)
+if command -v xattr &> /dev/null; then
+    print_status "Removing quarantine attributes..."
+    xattr -d com.apple.quarantine /usr/local/bin/ignite 2>/dev/null || true
+fi
+
 # Clean up
 cd - > /dev/null
 rm -rf "\$TMP_DIR"
@@ -589,9 +684,16 @@ else
 fi`;
 
 export default {
-  async fetch(request) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const userAgent = request.headers.get('User-Agent') || '';
+    
+    // Handle static assets
+    if (url.pathname === '/favicon.ico' || url.pathname === '/og.jpeg') {
+      // In production, Cloudflare will automatically serve these from the public directory
+      // For local development, you may need to handle them differently
+      return env.ASSETS.fetch(request);
+    }
     
     // Check if request is from a browser
     const isBrowser = userAgent.includes('Mozilla') || 

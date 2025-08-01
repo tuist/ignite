@@ -2,6 +2,9 @@ name = "tuist-ignite"
 main = "src/index.js"
 compatibility_date = "2024-01-01"
 
+[site]
+bucket = "./public"
+
 [env.production]
 routes = [
   { pattern = "ignite.tuist.dev", custom_domain = true }

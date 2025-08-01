@@ -77,6 +77,15 @@ print_status "Found Burrito binary: $BURRITO_BINARY"
 cp "$BURRITO_BINARY" ignite
 chmod +x ignite
 
+# Ensure jq is available for JSON parsing
+if ! command -v jq &> /dev/null; then
+    print_error "jq is required for notarization but not found. Please install jq."
+    if [ "$(uname)" = "Darwin" ]; then
+        echo "You can install jq with: brew install jq"
+    fi
+    exit 1
+fi
+
 # Just verify the binary is executable
 if [ ! -x "./ignite" ]; then
     print_error "Binary is not executable!"
@@ -125,8 +134,66 @@ if [ "$LOCAL_MODE" = "false" ]; then
     /usr/bin/codesign --verify --deep --verbose ignite
 
     print_status "Executable signed successfully"
+    
+    # Notarize the executable if Apple ID credentials are available
+    if [ -n "${APP_SPECIFIC_PASSWORD:-}" ]; then
+        print_status "Notarizing executable..."
+        
+        # Create a zip for notarization (notarytool requires zip format)
+        zip -q -r --symlinks "notarization-bundle.zip" ignite
+        
+        # Submit for notarization and get submission ID
+        RAW_JSON=$(xcrun notarytool submit "notarization-bundle.zip" \
+            --apple-id "pedro@pepicrft.me" \
+            --team-id "U6LC622NKF" \
+            --password "$APP_SPECIFIC_PASSWORD" \
+            --output-format json)
+        echo "$RAW_JSON"
+        SUBMISSION_ID=$(echo "$RAW_JSON" | jq -r '.id')
+        echo "Submission ID: $SUBMISSION_ID"
+        
+        # Wait for notarization to complete
+        while true; do
+            STATUS=$(xcrun notarytool info "$SUBMISSION_ID" \
+                --apple-id "pedro@pepicrft.me" \
+                --team-id "U6LC622NKF" \
+                --password "$APP_SPECIFIC_PASSWORD" \
+                --output-format json | jq -r '.status')
+            
+            case $STATUS in
+                "Accepted")
+                    print_status "Notarization succeeded!"
+                    break
+                    ;;
+                "In Progress")
+                    echo "Notarization in progress... waiting 30 seconds"
+                    sleep 30
+                    ;;
+                "Invalid"|"Rejected")
+                    print_error "Notarization failed with status: $STATUS"
+                    xcrun notarytool log "$SUBMISSION_ID" \
+                        --apple-id "pedro@pepicrft.me" \
+                        --team-id "U6LC622NKF" \
+                        --password "$APP_SPECIFIC_PASSWORD"
+                    exit 1
+                    ;;
+                *)
+                    print_error "Unknown status: $STATUS"
+                    exit 1
+                    ;;
+            esac
+        done
+        
+        # Clean up notarization zip
+        rm -f "notarization-bundle.zip"
+        
+        print_status "Notarization complete!"
+    else
+        print_status "Skipping notarization (APP_SPECIFIC_PASSWORD not provided)"
+        print_status "The binary will trigger Gatekeeper warnings when downloaded"
+    fi
 else
-    print_status "Local mode: Skipping code signing"
+    print_status "Local mode: Skipping code signing and notarization"
 fi
 
 # Create the distribution archive with just the executable
