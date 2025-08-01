@@ -3,8 +3,8 @@ const html = `<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ignite - Phoenix Development, Simplified</title>
-    <meta name="description" content="Ignite is a Phoenix application template that gets you up and running in seconds.">
+    <title>Ignite - App Development in the AI World</title>
+    <meta name="description" content="A web-based coding experience for apps. Create new projects or use existing ones.">
     
     <style>
         :root {
@@ -12,14 +12,14 @@ const html = `<!DOCTYPE html>
             --bg-secondary: #0a0a0a;
             --text-primary: #ffffff;
             --text-secondary: #999999;
-            --accent: #f97316;
-            --accent-hover: #fb923c;
+            --accent: #7c3aed;
+            --accent-hover: #8b5cf6;
             --terminal-bg: #0d0d0d;
             --terminal-border: #1a1a1a;
-            --terminal-text: #10b981;
-            --gradient-1: #f97316;
-            --gradient-2: #ec4899;
-            --gradient-3: #8b5cf6;
+            --terminal-text: #a78bfa;
+            --gradient-1: #7c3aed;
+            --gradient-2: #8b5cf6;
+            --gradient-3: #a78bfa;
         }
 
         * {
@@ -71,15 +71,15 @@ const html = `<!DOCTYPE html>
         }
 
         .hero {
-            padding: 120px 0;
+            padding: 80px 0 60px;
             text-align: center;
         }
 
         .hero h1 {
-            font-size: clamp(48px, 8vw, 96px);
+            font-size: clamp(36px, 6vw, 72px);
             font-weight: 800;
             line-height: 1.1;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
             letter-spacing: -0.03em;
             background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
             -webkit-background-clip: text;
@@ -88,9 +88,9 @@ const html = `<!DOCTYPE html>
         }
 
         .hero .subtitle {
-            font-size: clamp(20px, 3vw, 28px);
+            font-size: clamp(18px, 2.5vw, 24px);
             color: var(--text-secondary);
-            margin-bottom: 64px;
+            margin-bottom: 48px;
             font-weight: 400;
             max-width: 600px;
             margin-left: auto;
@@ -98,8 +98,8 @@ const html = `<!DOCTYPE html>
         }
 
         .terminal-container {
-            max-width: 800px;
-            margin: 0 auto 48px;
+            max-width: 700px;
+            margin: 0 auto 40px;
             position: relative;
         }
 
@@ -151,9 +151,9 @@ const html = `<!DOCTYPE html>
         .terminal-dot:nth-child(3) { background: #28ca42; }
 
         .terminal-body {
-            padding: 32px;
+            padding: 24px;
             font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', monospace;
-            font-size: 16px;
+            font-size: 15px;
             line-height: 1.6;
         }
 
@@ -216,18 +216,22 @@ const html = `<!DOCTYPE html>
 
         .features {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 32px;
-            margin-top: 96px;
-            margin-bottom: 96px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-top: 60px;
+            margin-bottom: 60px;
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .feature {
-            padding: 32px;
+            padding: 24px;
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
+            border-radius: 12px;
             transition: all 0.3s ease;
+            position: relative;
         }
 
         .feature:hover {
@@ -237,17 +241,34 @@ const html = `<!DOCTYPE html>
         }
 
         .feature h3 {
-            font-size: 20px;
-            margin-bottom: 12px;
-            background: linear-gradient(135deg, var(--gradient-1), var(--gradient-2));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: var(--text-primary);
         }
 
         .feature p {
             color: var(--text-secondary);
-            line-height: 1.6;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+        
+        .feature.paid {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(139, 92, 246, 0.05));
+            border-color: rgba(124, 58, 237, 0.3);
+        }
+        
+        .feature.paid::before {
+            content: 'PAID';
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: var(--gradient-1);
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
         }
 
         .toast {
@@ -271,25 +292,40 @@ const html = `<!DOCTYPE html>
         }
 
         footer {
-            padding: 48px 0;
+            padding: 32px 0;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             text-align: center;
             color: var(--text-secondary);
+            font-size: 14px;
         }
 
         @media (max-width: 768px) {
             .hero {
-                padding: 80px 0;
+                padding: 60px 0 40px;
+            }
+            
+            .hero h1 {
+                font-size: 32px;
+            }
+            
+            .hero .subtitle {
+                font-size: 16px;
+                margin-bottom: 32px;
             }
             
             .terminal-body {
-                padding: 20px;
-                font-size: 14px;
+                padding: 16px;
+                font-size: 13px;
             }
             
             .features {
-                gap: 24px;
-                margin-top: 64px;
+                gap: 16px;
+                margin-top: 40px;
+                margin-bottom: 40px;
+            }
+            
+            .feature {
+                padding: 20px;
             }
         }
     </style>
@@ -303,9 +339,9 @@ const html = `<!DOCTYPE html>
         </header>
         
         <section class="hero">
-            <h1>Phoenix Development,<br>Simplified</h1>
+            <h1>App Development<br>in the AI World</h1>
             <p class="subtitle">
-                A modern Phoenix application template that gets you up and running in seconds
+                A web-based coding experience powered by AI
             </p>
             
             <div class="terminal-container">
@@ -329,16 +365,16 @@ const html = `<!DOCTYPE html>
         
         <section class="features">
             <div class="feature">
-                <h3>🚀 Instant Setup</h3>
-                <p>Get a fully configured Phoenix application running in seconds. No complex setup or configuration needed.</p>
+                <h3>Web-Based Coding Experience</h3>
+                <p>Code directly in your browser with a powerful AI-assisted development environment.</p>
             </div>
             <div class="feature">
-                <h3>🔥 Modern Stack</h3>
-                <p>Built with Phoenix LiveView, Tailwind CSS, and all the modern tools you need for rapid development.</p>
+                <h3>Create or Open Projects</h3>
+                <p>Start a new project from scratch or work with your existing codebase seamlessly.</p>
             </div>
-            <div class="feature">
-                <h3>⚡ Lightning Fast</h3>
-                <p>Optimized for performance with built-in caching, asset optimization, and production-ready configurations.</p>
+            <div class="feature paid">
+                <h3>Develop from Anywhere</h3>
+                <p>Access your development environment from any device. Click to ignite your productivity.</p>
             </div>
         </section>
         
