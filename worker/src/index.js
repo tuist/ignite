@@ -4,7 +4,7 @@ const html = `<!DOCTYPE html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ignite - Apple App Development in the AI World | by Tuist</title>
-    <meta name="description" content="Build Apple apps with AI-powered development tools. Web-based coding experience that helps you ignite your ideas and turn them into reality. Install with one command.">
+    <meta name="description" content="Build Apple apps with AI-powered development tools. Web-based coding experience that helps you ignite your ideas and turn them into reality. Install with one command - no sudo required.">
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
@@ -493,18 +493,7 @@ const html = `<!DOCTYPE html>
                     </span>
                     Ignite
                 </h3>
-                <p>We assist you in preserving the energy of your idea and help materialize it, turning inspiration into reality.</p>
-            </div>
-            <div class="feature">
-                <h3>
-                    <span class="feature-icon">
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M22.7 19L13.6 9.9C14.5 7.6 14 4.9 12.1 3C10.1 1 7.1 0.6 4.7 1.7L9 6L6 9L1.6 4.7C0.4 7.1 0.9 10.1 2.9 12.1C4.8 14 7.5 14.5 9.8 13.6L18.9 22.7C19.3 23.1 19.9 23.1 20.3 22.7L22.6 20.4C23.1 20 23.1 19.3 22.7 19Z"/>
-                        </svg>
-                    </span>
-                    Build
-                </h3>
-                <p>We help you build your idea with an overhauled developer experience that's conversational and web-based, making development accessible to everyone.</p>
+                <p>Transform your ideas into reality with an AI-powered, conversational development experience. We help you preserve the energy of your inspiration and build it into something tangible through a web-based interface that makes app development accessible to everyone.</p>
             </div>
             <div class="feature paid">
                 <h3>
@@ -654,32 +643,99 @@ cd "\$TMP_DIR"
 curl -fsSL "\$DOWNLOAD_URL" -o ignite.tar.gz
 tar -xzf ignite.tar.gz
 
-# Install to /usr/local/bin
-print_status "Installing to /usr/local/bin/ignite..."
-if [ -w "/usr/local/bin" ]; then
-    mv ignite /usr/local/bin/
-else
-    print_warning "Need sudo access to install to /usr/local/bin"
-    sudo mv ignite /usr/local/bin/
-fi
+# Set up installation directory
+INSTALL_DIR="\$HOME/.local/share/ignite"
+BIN_DIR="\$INSTALL_DIR/bin"
+
+print_status "Installing to \$BIN_DIR/ignite..."
+
+# Create directories
+mkdir -p "\$BIN_DIR"
+
+# Move binary to installation directory
+mv ignite "\$BIN_DIR/"
 
 # Remove quarantine attribute if present (for non-notarized binaries)
 if command -v xattr &> /dev/null; then
     print_status "Removing quarantine attributes..."
-    xattr -d com.apple.quarantine /usr/local/bin/ignite 2>/dev/null || true
+    xattr -d com.apple.quarantine "\$BIN_DIR/ignite" 2>/dev/null || true
 fi
+
+# Make sure it's executable
+chmod +x "\$BIN_DIR/ignite"
 
 # Clean up
 cd - > /dev/null
 rm -rf "\$TMP_DIR"
 
+# Add to PATH if not already present
+add_to_path() {
+    local shell_config=""
+    local shell_name=""
+    
+    # Determine shell configuration file
+    if [ -n "\$BASH_VERSION" ]; then
+        shell_name="bash"
+        if [ -f "\$HOME/.bash_profile" ]; then
+            shell_config="\$HOME/.bash_profile"
+        elif [ -f "\$HOME/.bashrc" ]; then
+            shell_config="\$HOME/.bashrc"
+        else
+            shell_config="\$HOME/.bash_profile"
+        fi
+    elif [ -n "\$ZSH_VERSION" ]; then
+        shell_name="zsh"
+        shell_config="\$HOME/.zshrc"
+    elif [ -n "\$FISH_VERSION" ]; then
+        shell_name="fish"
+        shell_config="\$HOME/.config/fish/config.fish"
+    else
+        shell_name="unknown"
+        shell_config="\$HOME/.profile"
+    fi
+    
+    # Check if bin directory is already in PATH
+    if [[ ":\$PATH:" != *":\$BIN_DIR:"* ]]; then
+        print_status "Adding \$BIN_DIR to PATH in \$shell_config"
+        
+        if [ "\$shell_name" = "fish" ]; then
+            echo "set -gx PATH \\\$PATH \$BIN_DIR" >> "\$shell_config"
+        else
+            echo "" >> "\$shell_config"
+            echo "# Added by Ignite installer" >> "\$shell_config"
+            echo "export PATH=\"\\\$PATH:\$BIN_DIR\"" >> "\$shell_config"
+        fi
+        
+        print_warning "PATH updated. To use ignite immediately, run:"
+        if [ "\$shell_name" = "fish" ]; then
+            echo "  source \$shell_config"
+        else
+            echo "  source \$shell_config"
+        fi
+        echo ""
+        echo "Or start a new terminal session."
+    else
+        print_status "PATH already includes \$BIN_DIR"
+    fi
+}
+
+# Add to PATH
+add_to_path
+
 # Verify installation
-if command -v ignite &> /dev/null; then
+if [ -x "\$BIN_DIR/ignite" ]; then
     print_status "Ignite \$VERSION installed successfully!"
     echo ""
-    echo "Run 'ignite' to start your Phoenix application"
+    echo "Installation directory: \$INSTALL_DIR"
+    echo ""
+    if command -v ignite &> /dev/null; then
+        echo "Run 'ignite' to start your Phoenix application"
+    else
+        echo "Run '\$BIN_DIR/ignite' to start your Phoenix application"
+        echo "Or restart your terminal to have 'ignite' in your PATH"
+    fi
 else
-    print_error "Installation failed. Please check your PATH includes /usr/local/bin"
+    print_error "Installation failed."
     exit 1
 fi`;
 
@@ -690,9 +746,29 @@ export default {
     
     // Handle static assets
     if (url.pathname === '/favicon.ico' || url.pathname === '/og.jpeg') {
-      // In production, Cloudflare will automatically serve these from the public directory
-      // For local development, you may need to handle them differently
-      return env.ASSETS.fetch(request);
+      // Try to fetch from ASSETS binding if available (production)
+      if (env.ASSETS) {
+        try {
+          return await env.ASSETS.fetch(request);
+        } catch (e) {
+          // Fallback if ASSETS fetch fails
+        }
+      }
+      
+      // For development, return a simple response
+      if (url.pathname === '/favicon.ico') {
+        // Return the flame emoji as SVG favicon for development
+        const svgFavicon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="0.9em" font-size="90">🔥</text></svg>`;
+        return new Response(svgFavicon, {
+          headers: {
+            'Content-Type': 'image/svg+xml',
+            'Cache-Control': 'public, max-age=86400',
+          },
+        });
+      }
+      
+      // Return 404 for other assets in development
+      return new Response('Not found', { status: 404 });
     }
     
     // Check if request is from a browser
