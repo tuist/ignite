@@ -232,11 +232,11 @@ const html = `<!DOCTYPE html>
 
         .features {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 20px;
             margin-top: 40px;
             margin-bottom: 40px;
-            max-width: 900px;
+            max-width: 1000px;
             margin-left: auto;
             margin-right: auto;
         }
@@ -248,6 +248,9 @@ const html = `<!DOCTYPE html>
             border-radius: 12px;
             transition: all 0.3s ease;
             position: relative;
+            display: flex;
+            flex-direction: column;
+            min-height: 160px;
         }
 
         .feature:hover {
@@ -260,12 +263,28 @@ const html = `<!DOCTYPE html>
             font-size: 16px;
             margin-bottom: 6px;
             color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .feature-icon {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+        
+        .feature-icon svg {
+            width: 100%;
+            height: 100%;
+            fill: var(--terminal-text);
         }
 
         .feature p {
             color: var(--text-secondary);
             line-height: 1.5;
             font-size: 14px;
+            flex-grow: 1;
         }
         
         .feature.paid {
@@ -273,18 +292,31 @@ const html = `<!DOCTYPE html>
             border-color: rgba(124, 58, 237, 0.3);
         }
         
-        .feature.paid::before {
-            content: 'PAID';
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            background: var(--gradient-1);
-            color: white;
-            font-size: 10px;
-            font-weight: 700;
-            padding: 4px 8px;
-            border-radius: 4px;
-            letter-spacing: 0.5px;
+        .powered-by {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: auto;
+            padding-top: 12px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .powered-by img {
+            height: 20px;
+            width: auto;
+            filter: brightness(0.8);
+        }
+        
+        .powered-by a {
+            color: var(--terminal-text);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+        
+        .powered-by a:hover {
+            color: var(--accent-hover);
         }
 
         .toast {
@@ -366,7 +398,7 @@ const html = `<!DOCTYPE html>
         </header>
         
         <section class="hero">
-            <h1>App Development<br>in the AI World</h1>
+            <h1>Apple App Development<br>in the AI World</h1>
             <p class="subtitle">
                 A web-based coding experience powered by AI
             </p>
@@ -392,16 +424,56 @@ const html = `<!DOCTYPE html>
         
         <section class="features">
             <div class="feature">
-                <h3>Web-Based Coding Experience</h3>
-                <p>Code directly in your browser with a powerful AI-assisted development environment.</p>
+                <h3>
+                    <span class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2L13.09 8.26L19 7L15.45 11.82L21 16L14.82 16.45L16 22L11 17.27L6 22L7.18 16.45L1 16L6.55 11.82L3 7L8.91 8.26L12 2Z"/>
+                        </svg>
+                    </span>
+                    Ignite
+                </h3>
+                <p>We assist you in preserving the energy of your idea and help materialize it, turning inspiration into reality.</p>
             </div>
             <div class="feature">
-                <h3>Create or Open Projects</h3>
-                <p>Start a new project from scratch or work with your existing codebase seamlessly.</p>
+                <h3>
+                    <span class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M22.7 19L13.6 9.9C14.5 7.6 14 4.9 12.1 3C10.1 1 7.1 0.6 4.7 1.7L9 6L6 9L1.6 4.7C0.4 7.1 0.9 10.1 2.9 12.1C4.8 14 7.5 14.5 9.8 13.6L18.9 22.7C19.3 23.1 19.9 23.1 20.3 22.7L22.6 20.4C23.1 20 23.1 19.3 22.7 19Z"/>
+                        </svg>
+                    </span>
+                    Build
+                </h3>
+                <p>We help you build your idea with an overhauled developer experience that's conversational and web-based, making development accessible to everyone.</p>
             </div>
             <div class="feature paid">
-                <h3>Develop from Anywhere</h3>
-                <p>Access your development environment from any device. Click to ignite your productivity.</p>
+                <h3>
+                    <span class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9 11H7V13H9V11ZM13 11H11V13H13V11ZM17 11H15V13H17V11ZM19 4H18V2H16V4H8V2H6V4H5C3.89 4 3.01 4.9 3.01 6L3 20C3 21.1 3.89 22 5 22H19C20.1 22 21 21.1 21 20V6C21 4.9 20.1 4 19 4ZM19 20H5V9H19V20Z"/>
+                        </svg>
+                    </span>
+                    QA
+                </h3>
+                <p>Use our intelligent agents to test your work automatically. Get comprehensive quality assurance without manual effort.</p>
+                <div class="powered-by">
+                    <img src="https://github.com/tuist/tuist/blob/main/docs/docs/public/logo.png?raw=true" alt="Tuist Logo">
+                    <span>Powered by <a href="https://tuist.io" target="_blank">Tuist</a></span>
+                </div>
+            </div>
+            <div class="feature paid">
+                <h3>
+                    <span class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M18 16.08C17.24 16.08 16.56 16.38 16.04 16.85L8.91 12.7C8.96 12.47 9 12.24 9 12S8.96 11.53 8.91 11.3L15.96 7.19C16.5 7.69 17.21 8 18 8C19.66 8 21 6.66 21 5S19.66 2 18 2 15 3.34 15 5C15 5.24 15.04 5.47 15.09 5.7L8.04 9.81C7.5 9.31 6.79 9 6 9C4.34 9 3 10.34 3 12S4.34 15 6 15C6.79 15 7.5 14.69 8.04 14.19L15.16 18.35C15.11 18.56 15.08 18.78 15.08 19C15.08 20.61 16.39 21.92 18 21.92S20.92 20.61 20.92 19 19.61 16.08 18 16.08Z"/>
+                        </svg>
+                    </span>
+                    Share
+                </h3>
+                <p>Release and share your creations instantly. Generate live previews and collaborate with others in real-time.</p>
+                <div class="powered-by">
+                    <img src="https://github.com/tuist/tuist/blob/main/docs/docs/public/logo.png?raw=true" alt="Tuist Logo">
+                    <span>Powered by <a href="https://tuist.io" target="_blank">Tuist</a></span>
+                </div>
             </div>
         </section>
         

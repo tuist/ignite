@@ -77,19 +77,10 @@ print_status "Found Burrito binary: $BURRITO_BINARY"
 cp "$BURRITO_BINARY" ignite
 chmod +x ignite
 
-# Test the release by checking version (without starting the server)
-print_status "Testing release..."
-# Just check if the binary is executable and valid
-if ./ignite --version 2>/dev/null || ./ignite version 2>/dev/null; then
-    echo "Version check passed"
-else
-    # If no version flag, at least check if it's a valid executable
-    if [ -x "./ignite" ]; then
-        echo "Executable is valid (no version flag available)"
-    else
-        print_error "Executable test failed!"
-        exit 1
-    fi
+# Just verify the binary is executable
+if [ ! -x "./ignite" ]; then
+    print_error "Binary is not executable!"
+    exit 1
 fi
 
 # Check what type of file the executable is
@@ -128,11 +119,11 @@ if [ "$LOCAL_MODE" = "false" ]; then
 
     # Sign the single Burrito executable
     /usr/bin/codesign --force --sign "$CERTIFICATE_NAME" --timestamp --options runtime --verbose ignite
-    
+
     # Verify the signature
     print_status "Verifying signature..."
     /usr/bin/codesign --verify --deep --verbose ignite
-    
+
     print_status "Executable signed successfully"
 else
     print_status "Local mode: Skipping code signing"

@@ -20,8 +20,8 @@ cd "${MISE_PROJECT_ROOT}/worker"
 
 print_status "Deploying Cloudflare Worker..."
 
-# Deploy the worker
-if wrangler deploy; then
+# Deploy the worker to production environment
+if wrangler deploy --env production; then
     print_status "Worker deployed successfully!"
     echo ""
     echo "Your worker is now available at:"
