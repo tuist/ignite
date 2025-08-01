@@ -110,41 +110,42 @@ jobs:
           echo "Creating release archive..."
           RELEASE_DIR="_build/prod/rel/ignite"
           
-          # Create a standalone directory with the release
-          mkdir -p ignite-macos
-          cp -r $RELEASE_DIR/* ignite-macos/
+          # Create a temporary directory for the release
+          mkdir -p release-package
+          cd release-package
           
-          # Create a simple launcher script
+          # Copy the entire release directory contents
+          cp -r ../$RELEASE_DIR/* .
+          
+          # Create a wrapper script at the top level
           cat > ignite << 'EOF'
           #!/bin/bash
-          # Ignite CLI Launcher
+          # Ignite CLI
           
           # Determine the directory where this script resides
           SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
           
-          # Check if running from packaged release or development
-          if [ -d "$SCRIPT_DIR/ignite-macos" ]; then
-            # Running from extracted archive
-            exec "$SCRIPT_DIR/ignite-macos/bin/ignite" "$@"
-          elif [ -f "$SCRIPT_DIR/bin/ignite" ]; then
-            # Running from release directory
-            exec "$SCRIPT_DIR/bin/ignite" "$@"
-          else
-            echo "Error: Could not find ignite executable"
-            exit 1
-          fi
+          # Execute the actual ignite binary
+          exec "$SCRIPT_DIR/bin/ignite" "$@"
           EOF
           
           chmod +x ignite
           
+          # Make the main binary executable as well
+          chmod +x bin/ignite
+          
           # Test the release
           echo "Testing release..."
-          $RELEASE_DIR/bin/ignite eval "IO.puts(:ignite |> Application.spec(:vsn))" || echo "Version check failed"
+          ./ignite eval "IO.puts(:ignite |> Application.spec(:vsn))" || echo "Version check failed"
+          
+          cd ..
 
       - name: Create release archive and checksums
         run: |
-          # Create tar.gz archive
-          tar -czf ignite-macos.tar.gz ignite-macos ignite
+          # Create tar.gz archive from inside the directory to avoid extra folder
+          cd release-package
+          tar -czf ../ignite-macos.tar.gz .
+          cd ..
           
           # Generate checksums
           shasum -a 256 ignite-macos.tar.gz > SHA256.txt
