@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 <!-- RELEASE NOTES START -->
+## [0.4.1] - 2025-08-01
+
+### <!-- 1 -->🐛 Bug Fixes
+- Sign all executables in the release to prevent macOS security warnings by @pepicrft
+**Full Changelog**: https://github.com/tuist/ignite/compare/0.4.0...0.4.1
+<!-- RELEASE NOTES START -->
 ## [0.4.0] - 2025-08-01
 
 ### <!-- 0 -->⛰️  Features
