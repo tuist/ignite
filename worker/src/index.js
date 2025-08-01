@@ -59,35 +59,31 @@ const html = `<!DOCTYPE html>
         header {
             padding: 20px 0;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
 
+        .logo-container {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
         .logo {
             font-size: 24px;
             font-weight: 700;
-            background: linear-gradient(135deg, var(--gradient-1), var(--gradient-2));
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
         
         .by-tuist {
-            background: rgba(124, 58, 237, 0.1);
-            border: 1px solid rgba(124, 58, 237, 0.3);
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 13px;
-            color: var(--accent);
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
-        
-        .by-tuist:hover {
-            background: rgba(124, 58, 237, 0.15);
-            border-color: rgba(124, 58, 237, 0.5);
-            transform: translateY(-1px);
+            background: var(--accent);
+            padding: 4px 10px;
+            border-radius: 16px;
+            font-size: 12px;
+            color: white;
+            font-weight: 600;
+            letter-spacing: 0.3px;
         }
 
         .hero {
@@ -363,8 +359,10 @@ const html = `<!DOCTYPE html>
     
     <div class="container">
         <header>
-            <div class="logo">🔥 Ignite</div>
-            <div class="by-tuist">by Tuist</div>
+            <div class="logo-container">
+                <div class="logo">🔥 Ignite</div>
+                <div class="by-tuist">by Tuist</div>
+            </div>
         </header>
         
         <section class="hero">
