@@ -3,6 +3,54 @@
 All notable changes to this project will be documented in this file.
 
 <!-- RELEASE NOTES START -->
+## [0.8.0] - 2025-08-01
+
+### <!-- 0 -->⛰️  Features
+- Update marketing site features and add CI workflow for Cloudflare Worker deployment by @pepicrft
+**Full Changelog**: https://github.com/tuist/ignite/compare/0.7.1...0.8.0
+<!-- RELEASE NOTES START -->
+## [0.7.1] - 2025-08-01
+
+### <!-- 1 -->🐛 Bug Fixes
+- Move 'by Tuist' badge next to logo with solid purple background and better contrast by @pepicrft
+**Full Changelog**: https://github.com/tuist/ignite/compare/0.7.0...0.7.1
+<!-- RELEASE NOTES START -->
+## [0.7.0] - 2025-08-01
+
+### <!-- 0 -->⛰️  Features
+- Add 'by Tuist' badge to header by @pepicrft
+**Full Changelog**: https://github.com/tuist/ignite/compare/0.6.2...0.7.0
+<!-- RELEASE NOTES START -->
+## [0.6.2] - 2025-08-01
+
+### <!-- 1 -->🐛 Bug Fixes
+- Compress layout further to fit on single screen and add flame emoji to logo by @pepicrft
+**Full Changelog**: https://github.com/tuist/ignite/compare/0.6.1...0.6.2
+<!-- RELEASE NOTES START -->
+## [0.6.1] - 2025-08-01
+
+### <!-- 1 -->🐛 Bug Fixes
+- Update marketing site copy and styling to match requirements by @pepicrft
+**Full Changelog**: https://github.com/tuist/ignite/compare/0.6.0...0.6.1
+<!-- RELEASE NOTES START -->
+## [0.6.0] - 2025-08-01
+
+### <!-- 0 -->⛰️  Features
+- Add Cloudflare Worker for marketing site and install script by @pepicrft
+**Full Changelog**: https://github.com/tuist/ignite/compare/0.5.1...0.6.0
+<!-- RELEASE NOTES START -->
+## [0.5.1] - 2025-08-01
+
+### <!-- 1 -->🐛 Bug Fixes
+- Add CLI module to handle --version flag and prevent hanging during release by @pepicrft
+**Full Changelog**: https://github.com/tuist/ignite/compare/0.5.0...0.5.1
+<!-- RELEASE NOTES START -->
+## [0.5.0] - 2025-08-01
+
+### <!-- 0 -->⛰️  Features
+- Use Burrito to create a single portable executable by @pepicrft
+**Full Changelog**: https://github.com/tuist/ignite/compare/0.4.1...0.5.0
+<!-- RELEASE NOTES START -->
 ## [0.4.1] - 2025-08-01
 
 ### <!-- 1 -->🐛 Bug Fixes
