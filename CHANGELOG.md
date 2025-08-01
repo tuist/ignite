@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 <!-- RELEASE NOTES START -->
+## [0.13.0] - 2025-08-01
+
+### <!-- 0 -->⛰️  Features
+- Add browser launcher with MuonTrap for lifecycle management by @pepicrft
+**Full Changelog**: https://github.com/tuist/ignite/compare/0.12.0...0.13.0
+<!-- RELEASE NOTES START -->
 ## [0.12.0] - 2025-08-01
 
 ### <!-- 0 -->⛰️  Features
