@@ -87,7 +87,12 @@ security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
 security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
 
 # Add to keychain search list
-security list-keychains -d user -s "$KEYCHAIN_PATH" $(security list-keychains -d user | sed s/\"//g)
+EXISTING_KEYCHAINS=$(security list-keychains -d user | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | tr '\n' ' ')
+if [ -n "$EXISTING_KEYCHAINS" ]; then
+    security list-keychains -d user -s "$KEYCHAIN_PATH" $EXISTING_KEYCHAINS
+else
+    security list-keychains -d user -s "$KEYCHAIN_PATH"
+fi
 security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
 
 # Import certificate
