@@ -3,6 +3,21 @@
 All notable changes to this project will be documented in this file.
 
 <!-- RELEASE NOTES START -->
+## [0.12.0] - 2025-08-01
+
+### <!-- 0 -->⛰️  Features
+- Create Sidekick package for platform-specific operations by @pepicrft
+
+### <!-- 1 -->🐛 Bug Fixes
+- Configure Sidekick to use Phoenix endpoint URL configuration by @pepicrft
+**Full Changelog**: https://github.com/tuist/ignite/compare/0.11.1...0.12.0
+<!-- RELEASE NOTES START -->
+## [0.11.1] - 2025-08-01
+
+### <!-- 2 -->📚 Documentation
+- Add local agent architecture documentation by @pepicrft
+**Full Changelog**: https://github.com/tuist/ignite/compare/0.11.0...0.11.1
+<!-- RELEASE NOTES START -->
 ## [0.11.0] - 2025-08-01
 
 ### <!-- 0 -->⛰️  Features
