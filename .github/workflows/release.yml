@@ -102,11 +102,10 @@ jobs:
           echo "Checking environment variables..."
           mise exec -- bash -c 'if [ -n "$CERTIFICATE_PASSWORD" ] && [ -n "$APP_SPECIFIC_PASSWORD" ] && [ -n "$BASE_64_DEVELOPER_ID_APPLICATION_CERTIFICATE" ]; then echo "✓ All environment variables are loaded"; else echo "✗ Environment variables missing"; fi'
 
-      - name: Build, sign, and notarize release
+      - name: Build and sign release
         run: mise run release:build-and-sign
         env:
           CERTIFICATE_PASSWORD: ${{ secrets.CERTIFICATE_PASSWORD }}
-          APP_SPECIFIC_PASSWORD: ${{ secrets.APP_SPECIFIC_PASSWORD }}
           BASE_64_DEVELOPER_ID_APPLICATION_CERTIFICATE: ${{ secrets.BASE_64_DEVELOPER_ID_APPLICATION_CERTIFICATE }}
 
       - name: Upload artifacts

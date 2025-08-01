@@ -1,5 +1,5 @@
 #!/bin/bash
-# mise description="Build, sign, and notarize a release"
+# mise description="Build and sign a release"
 
 set -euo pipefail
 
@@ -27,13 +27,14 @@ else
     LOCAL_MODE=false
 fi
 
-# Ensure environment is set up
-if [ -z "${CERTIFICATE_PASSWORD:-}" ] || [ -z "${APP_SPECIFIC_PASSWORD:-}" ] || [ -z "${BASE_64_DEVELOPER_ID_APPLICATION_CERTIFICATE:-}" ]; then
-    print_error "Required environment variables are not set. Please ensure .env.json is properly configured."
-    print_error "CERTIFICATE_PASSWORD: ${CERTIFICATE_PASSWORD:+[SET]}${CERTIFICATE_PASSWORD:-[NOT SET]}"
-    print_error "APP_SPECIFIC_PASSWORD: ${APP_SPECIFIC_PASSWORD:+[SET]}${APP_SPECIFIC_PASSWORD:-[NOT SET]}"
-    print_error "BASE_64_DEVELOPER_ID_APPLICATION_CERTIFICATE: ${BASE_64_DEVELOPER_ID_APPLICATION_CERTIFICATE:+[SET]}${BASE_64_DEVELOPER_ID_APPLICATION_CERTIFICATE:-[NOT SET]}"
-    exit 1
+# Ensure environment is set up for signing
+if [ "$LOCAL_MODE" = "false" ]; then
+    if [ -z "${CERTIFICATE_PASSWORD:-}" ] || [ -z "${BASE_64_DEVELOPER_ID_APPLICATION_CERTIFICATE:-}" ]; then
+        print_error "Required environment variables are not set. Please ensure .env.json is properly configured."
+        print_error "CERTIFICATE_PASSWORD: ${CERTIFICATE_PASSWORD:+[SET]}${CERTIFICATE_PASSWORD:-[NOT SET]}"
+        print_error "BASE_64_DEVELOPER_ID_APPLICATION_CERTIFICATE: ${BASE_64_DEVELOPER_ID_APPLICATION_CERTIFICATE:+[SET]}${BASE_64_DEVELOPER_ID_APPLICATION_CERTIFICATE:-[NOT SET]}"
+        exit 1
+    fi
 fi
 
 print_status "Building release..."
@@ -150,67 +151,8 @@ fi
 
 print_status "Creating release archive..."
 
-if [ "$LOCAL_MODE" = "false" ]; then
-    print_status "Notarizing release..."
-
-    APPLE_ID="pedro@pepicrft.me"
-    TEAM_ID="U6LC622NKF"
-
-    # Create a zip with just the signed binary for notarization
-    print_status "Creating notarization bundle..."
-    zip -j ignite-notarization.zip release-package/bin/ignite
-    
-    # Check the zip contents
-    print_status "Checking notarization bundle contents..."
-    unzip -l ignite-notarization.zip
-
-    # Submit for notarization
-    RAW_JSON=$(xcrun notarytool submit "ignite-notarization.zip" \
-        --apple-id "$APPLE_ID" \
-        --team-id "$TEAM_ID" \
-        --password "$APP_SPECIFIC_PASSWORD" \
-        --output-format json)
-    echo "$RAW_JSON"
-    SUBMISSION_ID=$(echo "$RAW_JSON" | jq -r ".id")
-    echo "Submission ID: $SUBMISSION_ID"
-
-    # Wait for notarization
-    while true; do
-        STATUS=$(xcrun notarytool info "$SUBMISSION_ID" \
-            --apple-id "$APPLE_ID" \
-            --team-id "$TEAM_ID" \
-            --password "$APP_SPECIFIC_PASSWORD" \
-            --output-format json | jq -r ".status")
-
-        case $STATUS in
-            "Accepted")
-                print_status "Notarization succeeded!"
-                break
-                ;;
-            "In Progress")
-                echo "Notarization in progress... waiting 30 seconds"
-                sleep 30
-                ;;
-            "Invalid"|"Rejected")
-                print_error "Notarization failed with status: $STATUS"
-                xcrun notarytool log "$SUBMISSION_ID" \
-                    --apple-id "$APPLE_ID" \
-                    --team-id "$TEAM_ID" \
-                    --password "$APP_SPECIFIC_PASSWORD"
-                exit 1
-                ;;
-            *)
-                print_error "Unknown status: $STATUS"
-                exit 1
-                ;;
-        esac
-    done
-    
-    # Clean up notarization zip
-    rm -f ignite-notarization.zip
-else
-    print_status "Local mode: Skipping notarization"
-fi
+# Notarization is not needed for CLI tools, only GUI apps
+print_status "Skipping notarization (not required for CLI tools)"
 
 # Now create the distribution archive
 print_status "Creating distribution archive..."
