@@ -90,6 +90,11 @@ chmod +x bin/ignite
 print_status "Testing release..."
 ./ignite eval "IO.puts(:ignite |> Application.spec(:vsn))" || echo "Version check failed"
 
+# Check what type of file the main executable is
+print_status "Checking executable type..."
+file ignite
+ls -la ignite
+
 cd ..
 
 CERTIFICATE_NAME="Developer ID Application: Tuist GmbH (U6LC622NKF)"
@@ -125,23 +130,22 @@ fi
 if [ "$LOCAL_MODE" = "false" ]; then
     print_status "Signing executables..."
 
-    # Sign the main ignite wrapper (without specifying keychain like Tuist)
-    /usr/bin/codesign --sign "$CERTIFICATE_NAME" --timestamp --options runtime --verbose release-package/ignite
-
-    # Sign the actual Elixir release binary
-    /usr/bin/codesign --sign "$CERTIFICATE_NAME" --timestamp --options runtime --verbose release-package/bin/ignite
-
-    # Sign any other executables in bin directory
-    find release-package/bin -type f -perm +111 | while read -r file; do
-        echo "Signing: $file"
-        /usr/bin/codesign --sign "$CERTIFICATE_NAME" --timestamp --options runtime --verbose "$file" || true
-    done
-
-    # Sign ERTS binaries
+    # The wrapper script cannot be signed, so we need to sign the actual binaries
+    # Sign the Elixir release binary
+    if [ -f "release-package/bin/ignite" ]; then
+        print_status "Signing bin/ignite..."
+        /usr/bin/codesign --force --sign "$CERTIFICATE_NAME" --timestamp --options runtime --verbose release-package/bin/ignite
+    fi
+    
+    # Sign the main ERTS binaries that are required for the app to run
     if [ -d "release-package/erts-"* ]; then
-        find release-package/erts-*/bin -type f -perm +111 | while read -r file; do
-            echo "Signing ERTS binary: $file"
-            /usr/bin/codesign --sign "$CERTIFICATE_NAME" --timestamp --options runtime --verbose "$file" || true
+        # Sign only the critical ERTS binaries
+        for binary in beam.smp erl_child_setup inet_gethost heart; do
+            ERTS_BIN=$(find release-package/erts-*/bin -name "$binary" -type f | head -1)
+            if [ -n "$ERTS_BIN" ] && [ -f "$ERTS_BIN" ]; then
+                print_status "Signing ERTS binary: $binary"
+                /usr/bin/codesign --force --sign "$CERTIFICATE_NAME" --timestamp --options runtime --verbose "$ERTS_BIN"
+            fi
         done
     fi
 else
@@ -156,9 +160,11 @@ if [ "$LOCAL_MODE" = "false" ]; then
     APPLE_ID="pedro@pepicrft.me"
     TEAM_ID="U6LC622NKF"
 
-    # Create a zip with just the main executable for notarization
+    # Create a zip with the entire signed release for notarization
     print_status "Creating notarization bundle..."
-    zip -j ignite-notarization.zip release-package/ignite
+    cd release-package
+    zip -q -r --symlinks ../ignite-notarization.zip .
+    cd ..
 
     # Submit for notarization
     RAW_JSON=$(xcrun notarytool submit "ignite-notarization.zip" \
