@@ -20,6 +20,12 @@ Ignite provides an alternative LLM-based coding experience to build apps. It can
 - 🖥️ **Locally with Tuist CLI**: Run `tuist ignite` to access the AI-powered coding experience directly from your terminal
 - ☁️ **Remotely via Tuist Platform**: Access Ignite through the Tuist platform or app, enabling you to code on the go from any device
 
+### 🚀 Quick Install
+
+```bash
+curl -fsSL https://ignite.tuist.dev | sh
+```
+
 ## 🛠️ Development
 
 ### Prerequisites
@@ -61,6 +67,22 @@ mise run release --all
 ```
 
 Releases are created in the `releases/` directory, ready for distribution! 📤
+
+### 🌐 Marketing Site & Installer
+
+The project includes a Cloudflare Worker that serves both the marketing site and the install script:
+
+```bash
+# Serve the worker locally for development
+mise run worker:serve
+
+# Deploy the worker to production
+mise run worker:deploy
+```
+
+The worker intelligently detects the client:
+- **Browsers** see a beautiful marketing page at https://ignite.tuist.dev
+- **curl/wget** receive an install script that can be piped to `sh`
 
 ## 🔗 Learn More
 
