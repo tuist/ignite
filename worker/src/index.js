@@ -733,12 +733,18 @@ if [ -x "\$BIN_DIR/ignite" ]; then
     echo ""
     echo "Installation directory: \$INSTALL_DIR"
     echo ""
-    if command -v ignite &> /dev/null; then
-        echo "Run 'ignite' to start your Phoenix application"
-    else
-        echo "Run '\$BIN_DIR/ignite' to start your Phoenix application"
-        echo "Or restart your terminal to have 'ignite' in your PATH"
+    
+    # Launch ignite
+    print_status "Launching Ignite..."
+    echo ""
+    
+    # Export PATH for current session if needed
+    if [[ ":\$PATH:" != *":\$BIN_DIR:"* ]]; then
+        export PATH="\$PATH:\$BIN_DIR"
     fi
+    
+    # Launch ignite
+    exec "\$BIN_DIR/ignite"
 else
     print_error "Installation failed."
     exit 1

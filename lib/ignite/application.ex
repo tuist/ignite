@@ -13,8 +13,8 @@ defmodule Ignite.Application do
       {Phoenix.PubSub, name: Ignite.PubSub},
       # Start the Finch HTTP client for sending emails
       {Finch, name: Ignite.Finch},
-      # Start a worker by calling: Ignite.Worker.start_link(arg)
-      # {Ignite.Worker, arg},
+      # Start Sidekick for platform-specific operations
+      sidekick_spec(),
       # Start to serve requests, typically the last entry
       IgniteWeb.Endpoint
     ]
@@ -23,6 +23,14 @@ defmodule Ignite.Application do
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Ignite.Supervisor]
     Supervisor.start_link(children, opts)
+  end
+
+  defp sidekick_spec do
+    # Get the Sidekick server URL from config or environment
+    server_url = System.get_env("SIDEKICK_URL") || 
+                 Application.get_env(:ignite, :sidekick_url, "localhost:50051")
+    
+    {Sidekick, server_url: server_url, name: Ignite.Sidekick}
   end
 
   # Tell Phoenix to update the endpoint configuration
