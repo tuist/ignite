@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 <!-- RELEASE NOTES START -->
+## [0.9.0] - 2025-08-01
+
+### <!-- 0 -->⛰️  Features
+- Update notarization process to match Tuist's approach by @pepicrft
+**Full Changelog**: https://github.com/tuist/ignite/compare/0.8.0...0.9.0
+<!-- RELEASE NOTES START -->
 ## [0.8.0] - 2025-08-01
 
 ### <!-- 0 -->⛰️  Features
