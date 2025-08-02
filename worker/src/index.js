@@ -195,6 +195,9 @@ const html = `<!DOCTYPE html>
             font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', monospace;
             font-size: 14px;
             line-height: 1.5;
+            overflow-x: auto;
+            overflow-y: hidden;
+            white-space: nowrap;
         }
 
         .command-line {
@@ -205,6 +208,7 @@ const html = `<!DOCTYPE html>
             position: relative;
             cursor: pointer;
             transition: all 0.2s ease;
+            white-space: nowrap;
         }
 
         .command-line:hover {
@@ -214,11 +218,13 @@ const html = `<!DOCTYPE html>
         .prompt {
             color: var(--text-secondary);
             user-select: none;
+            flex-shrink: 0;
         }
 
         .command {
             color: var(--terminal-text);
             font-weight: 500;
+            white-space: nowrap;
         }
 
         .cursor {
@@ -248,6 +254,7 @@ const html = `<!DOCTYPE html>
             opacity: 0;
             transition: opacity 0.2s ease;
             pointer-events: none;
+            white-space: nowrap;
         }
 
         .command-line:hover .copy-hint {
@@ -425,6 +432,8 @@ const html = `<!DOCTYPE html>
             .terminal-body {
                 padding: 16px;
                 font-size: 12px;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
             }
             
             .features {
@@ -443,6 +452,10 @@ const html = `<!DOCTYPE html>
             
             .feature p {
                 font-size: 13px;
+            }
+            
+            .copy-hint {
+                display: none;
             }
         }
     </style>
