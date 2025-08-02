@@ -4,14 +4,14 @@
 import PackageDescription
 
 let package = Package(
-    name: "ignite-swift",
+    name: "sidekick-swift",
     platforms: [
         .macOS(.v13)
     ],
     products: [
         .executable(
-            name: "ignite-swift",
-            targets: ["ignite-swift"]
+            name: "sidekick-swift",
+            targets: ["sidekick-swift"]
         )
     ],
     dependencies: [
@@ -19,11 +19,11 @@ let package = Package(
     ],
     targets: [
         .executableTarget(
-            name: "ignite-swift",
+            name: "sidekick-swift",
             dependencies: [
                 .product(name: "ArgumentParser", package: "swift-argument-parser")
             ],
-            path: "swift/Sources/ignite-swift"
+            path: "Sources/sidekick-swift"
         )
     ]
 )

@@ -4,10 +4,10 @@ defmodule Ignite.Swift do
   """
 
   @doc """
-  Runs the ignite-swift executable with the given arguments.
+  Runs the sidekick-swift executable with the given arguments.
   
-  In development, it runs through `swift run`.
-  In production, it looks for `ignite-swift` in the same directory as the Ignite executable.
+  In development, it runs through `swift run` in the sidekick-swift directory.
+  In production, it looks for `sidekick-swift` in the same directory as the Ignite executable.
   """
   def run(args \\ []) when is_list(args) do
     case Mix.env() do
@@ -23,15 +23,24 @@ defmodule Ignite.Swift do
   end
 
   defp run_development(args) do
+    # Change to sidekick-swift directory
+    original_dir = File.cwd!()
+    sidekick_dir = Path.join(original_dir, "sidekick-swift")
+    File.cd!(sidekick_dir)
+    
     cmd = "swift"
-    swift_args = ["run", "ignite-swift", "--"] ++ args
+    swift_args = ["run", "sidekick-swift", "--"] ++ args
     
     IO.puts("Running: #{cmd} #{Enum.join(swift_args, " ")}")
     
-    case System.cmd(cmd, swift_args, into: IO.stream(:stdio, :line)) do
+    result = case System.cmd(cmd, swift_args, into: IO.stream(:stdio, :line)) do
       {_, 0} -> :ok
       {_, exit_code} -> {:error, "Swift command failed with exit code: #{exit_code}"}
     end
+    
+    # Change back to original directory
+    File.cd!(original_dir)
+    result
   end
 
   defp run_production(args) do
@@ -42,7 +51,7 @@ defmodule Ignite.Swift do
       |> Path.dirname()
       |> Path.dirname()
     
-    swift_executable = Path.join(executable_dir, "ignite-swift")
+    swift_executable = Path.join(executable_dir, "sidekick-swift")
     
     if File.exists?(swift_executable) do
       IO.puts("Running: #{swift_executable} #{Enum.join(args, " ")}")

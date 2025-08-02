@@ -2,10 +2,10 @@ import ArgumentParser
 import Foundation
 
 @main
-struct IgniteSwift: ParsableCommand {
+struct SidekickSwift: ParsableCommand {
     static let configuration = CommandConfiguration(
-        commandName: "ignite-swift",
-        abstract: "Swift tooling for Ignite",
+        commandName: "sidekick-swift",
+        abstract: "Swift agent for Ignite that manages Apple platform operations",
         version: "0.1.0"
     )
     
@@ -17,7 +17,7 @@ struct IgniteSwift: ParsableCommand {
     
     mutating func run() throws {
         if verbose {
-            print("🔥 Ignite Swift CLI")
+            print("🚀 Sidekick Swift Agent")
             print("Arguments: \(arguments)")
         }
         
@@ -26,7 +26,7 @@ struct IgniteSwift: ParsableCommand {
         if !arguments.isEmpty {
             print("Received arguments: \(arguments.joined(separator: " "))")
         } else {
-            print("🔥 Ignite Swift is running!")
+            print("🚀 Sidekick Swift is running!")
         }
     }
 }
