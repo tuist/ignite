@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 <!-- RELEASE NOTES START -->
+## [0.13.2] - 2025-08-02
+
+### <!-- 1 -->🐛 Bug Fixes
+- Improve mobile terminal display with horizontal scrolling and better touch support by @pepicrft
+**Full Changelog**: https://github.com/tuist/ignite/compare/0.13.1...0.13.2
+<!-- RELEASE NOTES START -->
 ## [0.13.1] - 2025-08-01
 
 ### <!-- 1 -->🐛 Bug Fixes
