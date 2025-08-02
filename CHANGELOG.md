@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 <!-- RELEASE NOTES START -->
+## [0.14.0] - 2025-08-02
+
+### <!-- 0 -->⛰️  Features
+- Rename ignite-swift to sidekick-swift by @pepicrft
+**Full Changelog**: https://github.com/tuist/ignite/compare/0.13.2...0.14.0
+<!-- RELEASE NOTES START -->
 ## [0.13.2] - 2025-08-02
 
 ### <!-- 1 -->🐛 Bug Fixes
