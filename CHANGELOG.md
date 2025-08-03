@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 
 <!-- RELEASE NOTES START -->
+## [0.15.0] - 2025-08-03
+
+### <!-- 0 -->⛰️  Features
+- Transform ignite into Vue.js SPA with GraphQL API and database integration by @pepicrft
+**Full Changelog**: https://github.com/tuist/ignite/compare/0.14.1...0.15.0
+<!-- RELEASE NOTES START -->
+## [0.14.1] - 2025-08-03
+
+### <!-- 1 -->🐛 Bug Fixes
+- Resolve Vue app setup and CORS issues by @pepicrft
+**Full Changelog**: https://github.com/tuist/ignite/compare/0.14.0...0.14.1
+<!-- RELEASE NOTES START -->
 ## [0.14.0] - 2025-08-02
 
 ### <!-- 0 -->⛰️  Features
