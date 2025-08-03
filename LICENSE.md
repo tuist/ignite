@@ -1,3 +1,12 @@
+# License
+
+This repository contains multiple components with different licenses:
+
+- **app/**: Licensed under the MIT License. See [app/LICENSE.md](app/LICENSE.md) for details.
+- **All other components**: Licensed under the Mozilla Public License Version 2.0 as described below.
+
+---
+
 Mozilla Public License Version 2.0
 ==================================
 

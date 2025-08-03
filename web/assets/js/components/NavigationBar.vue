@@ -6,7 +6,7 @@
           <h1 class="text-xl font-semibold text-gray-900">Ignite</h1>
         </div>
         
-        <nav class="flex space-x-4">
+        <nav class="flex items-center space-x-4">
           <UButton 
             v-for="item in navigation" 
             :key="item.name"
@@ -16,6 +16,18 @@
             size="sm"
           >
             {{ item.name }}
+          </UButton>
+          
+          <UButton
+            href="https://github.com/tuist/ignite"
+            target="_blank"
+            rel="noopener noreferrer"
+            variant="ghost"
+            color="gray"
+            size="sm"
+            icon="i-heroicons-arrow-top-right-on-square"
+          >
+            GitHub
           </UButton>
         </nav>
       </div>
