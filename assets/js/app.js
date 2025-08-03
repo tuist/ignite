@@ -1,44 +1,113 @@
-// If you want to use Phoenix channels, run `mix help phx.gen.channel`
-// to get started and then uncomment the line below.
-// import "./user_socket.js"
+// Import CSS
+import '../css/app.css'
 
-// You can include dependencies in two ways.
-//
-// The simplest option is to put them in assets/vendor and
-// import them using relative paths:
-//
-//     import "../vendor/some-package.js"
-//
-// Alternatively, you can `npm install some-package --prefix assets` and import
-// them using a path starting with the package name:
-//
-//     import "some-package"
-//
+import { createApp } from 'vue'
+import { ApolloClient, InMemoryCache, split, createHttpLink } from '@apollo/client/core'
+import { getMainDefinition } from '@apollo/client/utilities'
+import gql from 'graphql-tag'
+import App from './components/App.vue'
 
-// Include phoenix_html to handle method=PUT/DELETE in forms and buttons.
-import "phoenix_html"
-// Establish Phoenix Socket and LiveView configuration.
-import {Socket} from "phoenix"
-import {LiveSocket} from "phoenix_live_view"
-import topbar from "../vendor/topbar"
+// Phoenix Socket imports
+import { Socket as PhoenixSocket } from 'phoenix'
+import * as AbsintheSocket from '@absinthe/socket'
+import { createAbsintheSocketLink } from '@absinthe/socket-apollo-link'
 
-let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
-let liveSocket = new LiveSocket("/live", Socket, {
-  longPollFallbackMs: 2500,
-  params: {_csrf_token: csrfToken}
+// Apollo Client setup
+const httpLink = createHttpLink({
+  uri: '/api/graphql',
+  credentials: 'same-origin'
 })
 
-// Show progress bar on live navigation and form submits
-topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})
-window.addEventListener("phx:page-loading-start", _info => topbar.show(300))
-window.addEventListener("phx:page-loading-stop", _info => topbar.hide())
+// Create Phoenix Socket
+const phoenixSocket = new PhoenixSocket('/socket', {
+  params: () => {
+    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+    return { token }
+  }
+})
 
-// connect if there are any LiveViews on the page
-liveSocket.connect()
+// Create Absinthe Socket
+const absintheSocket = AbsintheSocket.create(phoenixSocket)
 
-// expose liveSocket on window for web console debug logs and latency simulation:
-// >> liveSocket.enableDebug()
-// >> liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
-// >> liveSocket.disableLatencySim()
-window.liveSocket = liveSocket
+// Create Absinthe Socket Link
+const wsLink = createAbsintheSocketLink(absintheSocket)
 
+// Split traffic between websocket and http
+const link = split(
+  ({ query }) => {
+    const definition = getMainDefinition(query)
+    return (
+      definition.kind === 'OperationDefinition' &&
+      definition.operation === 'subscription'
+    )
+  },
+  wsLink,
+  httpLink
+)
+
+const apolloClient = new ApolloClient({
+  link,
+  cache: new InMemoryCache()
+})
+
+// Define GraphQL queries and subscriptions on App component
+App.queries = {
+  GET_PROJECTS: gql`
+    query GetProjects {
+      projects {
+        id
+        name
+        path
+        status
+      }
+    }
+  `,
+  GET_SIMULATORS: gql`
+    query GetSimulators {
+      simulators {
+        id
+        name
+        deviceType
+        runtime
+        state
+        isAvailable
+      }
+    }
+  `
+}
+
+App.subscriptions = {
+  PROJECT_UPDATED: gql`
+    subscription ProjectUpdated {
+      projectUpdated {
+        id
+        name
+        path
+        status
+      }
+    }
+  `,
+  BUILD_OUTPUT: gql`
+    subscription BuildOutput($buildId: ID!) {
+      buildOutput(buildId: $buildId) {
+        buildId
+        line
+        timestamp
+        type
+      }
+    }
+  `
+}
+
+// Mount the app
+const app = createApp(App, {
+  apolloClient
+})
+
+// Import and use NuxtUI plugin
+import ui from '@nuxt/ui/vue-plugin'
+
+// Configure the plugin
+app.use(ui)
+
+app.mount('#app')

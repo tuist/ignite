@@ -1,5 +1,6 @@
 defmodule IgniteWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :ignite
+  use Absinthe.Phoenix.Endpoint
 
   # The session will be stored in the cookie and signed,
   # this means its contents can be read but not tampered with.
@@ -14,6 +15,10 @@ defmodule IgniteWeb.Endpoint do
   socket "/live", Phoenix.LiveView.Socket,
     websocket: [connect_info: [session: @session_options]],
     longpoll: [connect_info: [session: @session_options]]
+  
+  socket "/socket", IgniteWeb.AbsintheSocket,
+    websocket: true,
+    longpoll: false
 
   # Serve at "/" the static files from "priv/static" directory.
   #
@@ -38,8 +43,12 @@ defmodule IgniteWeb.Endpoint do
     param_key: "request_logger",
     cookie_key: "request_logger"
 
+
   plug Plug.RequestId
   plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint]
+  
+  # Add CORS support for Vite dev server
+  plug IgniteWeb.Plugs.CORS
 
   plug Plug.Parsers,
     parsers: [:urlencoded, :multipart, :json],
