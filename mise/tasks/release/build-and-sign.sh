@@ -1,7 +1,7 @@
 #!/bin/bash
-# mise description="Build and sign a release"
-
 set -euo pipefail
+
+# mise description="Build and sign a release"
 
 # Color codes
 GREEN='\033[0;32m'

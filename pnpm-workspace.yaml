@@ -1,2 +1,2 @@
-ignoredBuiltDependencies:
-  - vue-demi
+packages:
+  - 'web'

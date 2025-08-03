@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
+set -eo pipefail
 
-mix deps.get
+(cd web && mix deps.get)
+(cd sidekick && mix deps.get)
+(cd app && tuist install)
 pnpm install
-tuist install

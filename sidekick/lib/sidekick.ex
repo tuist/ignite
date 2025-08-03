@@ -135,7 +135,7 @@ defmodule Sidekick do
   end
 
   @impl true
-  def handle_call(request, _from, %{channel: nil} = state) do
+  def handle_call(_request, _from, %{channel: nil} = state) do
     {:reply, {:error, "Not connected to Sidekick agent"}, state}
   end
 
@@ -192,10 +192,15 @@ defmodule Sidekick do
   defp establish_connection(server_url) do
     # TODO: Implement actual gRPC connection
     # For now, return a mock connection
-    {:ok, %{url: server_url}}
+    # This could fail in real implementation, so we keep the error handling
+    if server_url do
+      {:ok, %{url: server_url}}
+    else
+      {:error, "No server URL provided"}
+    end
   end
 
-  defp call_grpc(channel, method, params \\ %{}) do
+  defp call_grpc(_channel, method, _params \\ %{}) do
     # Use Orchard to get actual platform information
     case method do
       :health_check -> :ok

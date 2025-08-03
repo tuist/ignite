@@ -14,6 +14,7 @@
     "@apollo/client": "^3.13.9",
     "@headlessui/vue": "^1.7.23",
     "@iconify-json/heroicons": "^1.2.2",
+    "@nuxt/kit": "^4.0.2",
     "@nuxt/ui": "^3.3.0",
     "@popperjs/core": "^2.11.8",
     "@tailwindcss/aspect-ratio": "^0.4.2",

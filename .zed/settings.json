@@ -1,0 +1,35 @@
+{
+  "lsp": {
+    "elixir-ls": {
+      "settings": {
+        "mixEnv": "dev",
+        "mixTarget": "host",
+        "fetchDeps": true,
+        "dialyzerEnabled": true,
+        "enableTestLenses": true,
+        "suggestSpecs": true
+      }
+    }
+  },
+  "file_scan_exclusions": [
+    "**/.git",
+    "**/.svn",
+    "**/.hg",
+    "**/CVS",
+    "**/.DS_Store",
+    "**/Thumbs.db",
+    "**/.classpath",
+    "**/.settings",
+    "**/deps",
+    "**/_build",
+    "**/node_modules",
+    "**/.elixir_ls",
+    "web/deps",
+    "web/_build",
+    "web/node_modules",
+    "web/.elixir_ls",
+    "sidekick/deps",
+    "sidekick/_build",
+    "sidekick/.elixir_ls"
+  ]
+}

@@ -63,7 +63,7 @@ defmodule Ignite.MixProject do
       {:absinthe_plug, "~> 1.5"},
       
       # Local dependencies
-      {:sidekick, path: "sidekick"}
+      {:sidekick, path: "../sidekick"}
     ]
   end
 
@@ -75,11 +75,11 @@ defmodule Ignite.MixProject do
   # See the documentation for `Mix` for more info on aliases.
   defp aliases do
     [
-      setup: ["deps.get"],
+      setup: ["deps.get", "cmd pnpm install"],
       test: ["test"],
       "assets.deploy": [
         "cmd pnpm run build",
-        "phx.digest"
+        "phx.digest priv/static --output priv/static"
       ]
     ]
   end

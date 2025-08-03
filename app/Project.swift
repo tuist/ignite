@@ -16,8 +16,8 @@ let project = Project(
                     ],
                 ]
             ),
-            sources: ["app/Sources/**"],
-            resources: ["app/Resources/**"]
+            sources: ["Sources/**"],
+            resources: ["Resources/**"]
         ),
     ]
 )

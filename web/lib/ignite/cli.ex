@@ -31,7 +31,7 @@ defmodule Ignite.CLI do
     
     # Keep the process alive and handle shutdown signals
     receive do
-      {:EXIT, _from, reason} ->
+      {:EXIT, _from, _reason} ->
         IO.puts("\nShutting down...")
         Application.stop(:ignite)
         System.halt(0)

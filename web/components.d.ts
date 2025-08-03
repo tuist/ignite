@@ -13,10 +13,8 @@ declare module 'vue' {
     UApp: typeof import('./node_modules/.pnpm/@nuxt+ui@3.3.0_@babel+parser@7.28.0_embla-carousel@8.6.0_typescript@5.9.2_vite@7.0.6_ji_0d644cde86b712d0f29ef773e2893e2b/node_modules/@nuxt/ui/dist/runtime/components/App.vue')['default']
     UBadge: typeof import('./node_modules/.pnpm/@nuxt+ui@3.3.0_@babel+parser@7.28.0_embla-carousel@8.6.0_typescript@5.9.2_vite@7.0.6_ji_0d644cde86b712d0f29ef773e2893e2b/node_modules/@nuxt/ui/dist/runtime/components/Badge.vue')['default']
     UButton: typeof import('./node_modules/.pnpm/@nuxt+ui@3.3.0_@babel+parser@7.28.0_embla-carousel@8.6.0_typescript@5.9.2_vite@7.0.6_ji_0d644cde86b712d0f29ef773e2893e2b/node_modules/@nuxt/ui/dist/runtime/components/Button.vue')['default']
-    UCard: typeof import('./node_modules/.pnpm/@nuxt+ui@3.3.0_@babel+parser@7.28.0_embla-carousel@8.6.0_typescript@5.9.2_vite@7.0.6_ji_0d644cde86b712d0f29ef773e2893e2b/node_modules/@nuxt/ui/dist/runtime/components/Card.vue')['default']
     UIcon: typeof import('./node_modules/.pnpm/@nuxt+ui@3.3.0_@babel+parser@7.28.0_embla-carousel@8.6.0_typescript@5.9.2_vite@7.0.6_ji_0d644cde86b712d0f29ef773e2893e2b/node_modules/@nuxt/ui/dist/runtime/vue/components/Icon.vue')['default']
     UInput: typeof import('./node_modules/.pnpm/@nuxt+ui@3.3.0_@babel+parser@7.28.0_embla-carousel@8.6.0_typescript@5.9.2_vite@7.0.6_ji_0d644cde86b712d0f29ef773e2893e2b/node_modules/@nuxt/ui/dist/runtime/components/Input.vue')['default']
-    UModal: typeof import('./node_modules/.pnpm/@nuxt+ui@3.3.0_@babel+parser@7.28.0_embla-carousel@8.6.0_typescript@5.9.2_vite@7.0.6_ji_0d644cde86b712d0f29ef773e2893e2b/node_modules/@nuxt/ui/dist/runtime/components/Modal.vue')['default']
     USelectMenu: typeof import('./node_modules/.pnpm/@nuxt+ui@3.3.0_@babel+parser@7.28.0_embla-carousel@8.6.0_typescript@5.9.2_vite@7.0.6_ji_0d644cde86b712d0f29ef773e2893e2b/node_modules/@nuxt/ui/dist/runtime/components/SelectMenu.vue')['default']
   }
 }

@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+set -eo pipefail
+
 #MISE description="Build release for different platforms"
 #MISE alias="rel"
 #USAGE flag "--linux" help="Build for Linux"

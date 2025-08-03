@@ -32,7 +32,7 @@ defmodule IgniteWeb.GraphQL.Resolvers.Project do
   
   def update_project(_parent, %{id: id} = args, _resolution) do
     try do
-      project = Projects.get_project!(id)
+      _project = Projects.get_project!(id)
       case Projects.create_or_update_project(Map.put(args, :id, id)) do
         {:ok, updated_project} ->
           # Publish to subscriptions
@@ -52,7 +52,7 @@ defmodule IgniteWeb.GraphQL.Resolvers.Project do
   
   def delete_project(_parent, %{id: id}, _resolution) do
     try do
-      project = Projects.get_project!(id)
+      _project = Projects.get_project!(id)
       # For now, we'll mark it as inactive since there's no delete function
       case Projects.create_or_update_project(%{id: id, status: "inactive"}) do
         {:ok, updated_project} ->

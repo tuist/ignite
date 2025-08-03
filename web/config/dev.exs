@@ -47,7 +47,7 @@ config :ignite, IgniteWeb.Endpoint,
     patterns: [
       ~r"priv/static/(?!uploads/).*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",
-      ~r"lib/ignite_web/(controllers|live|components)/.*(ex|heex)$"
+      ~r"lib/(controllers|live|components)/.*(ex|heex)$"
     ]
   ]
 

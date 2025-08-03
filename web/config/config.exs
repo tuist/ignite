@@ -40,6 +40,12 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
+# Configure Phoenix digest to use priv/static
+config :phoenix, :digester, [
+  output_path: "priv/static",
+  input_paths: ["priv/static"]
+]
+
 # Store the environment at compile time
 config :ignite, :env, config_env()
 
