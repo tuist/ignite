@@ -196,13 +196,54 @@ defmodule Sidekick do
   end
 
   defp call_grpc(channel, method, params \\ %{}) do
-    # TODO: Implement actual gRPC calls
-    # For now, return mock responses
+    # Use Orchard to get actual platform information
     case method do
       :health_check -> :ok
-      :xcode_version -> {:ok, "15.0"}
-      :list_simulators -> {:ok, []}
-      :list_devices -> {:ok, []}
+      :xcode_version -> 
+        # Orchard doesn't provide xcode_version, use system command instead
+        case System.cmd("xcodebuild", ["-version"]) do
+          {output, 0} -> 
+            version = output |> String.split("\n") |> List.first() |> String.replace("Xcode ", "")
+            {:ok, version}
+          _ -> {:ok, "Unknown"}
+        end
+      :list_simulators -> 
+        case Orchard.Simulator.list() do
+          {:ok, simulators} -> 
+            formatted_simulators = Enum.map(simulators, fn sim ->
+              %{
+                identifier: sim.udid,
+                name: sim.name,
+                display_name: sim.name,
+                device: sim.device_type,
+                os: sim.runtime,
+                runtime: sim.runtime,
+                state: sim.state,
+                is_available: sim.state == "Booted"
+              }
+            end)
+            {:ok, formatted_simulators}
+          {:error, reason} -> 
+            Logger.error("Failed to list simulators: #{inspect(reason)}")
+            {:error, reason}
+        end
+      :list_devices -> 
+        case Orchard.Device.list() do
+          {:ok, devices} ->
+            formatted_devices = Enum.map(devices, fn dev ->
+              %{
+                identifier: dev.udid,
+                name: dev.name,
+                display_name: dev.name,
+                device: dev.device_type,
+                state: dev.connection_type
+              }
+            end)
+            {:ok, formatted_devices}
+          {:error, reason} ->
+            Logger.error("Failed to list devices: #{inspect(reason)}")
+            {:error, reason}
+        end
       _ -> {:error, "Not implemented"}
     end
   end

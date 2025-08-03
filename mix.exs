@@ -41,15 +41,6 @@ defmodule Ignite.MixProject do
       {:phoenix_live_view, "~> 1.0"},
       {:floki, ">= 0.30.0", only: :test},
       {:phoenix_live_dashboard, "~> 0.8.3"},
-      {:esbuild, "~> 0.8", runtime: Mix.env() == :dev},
-      {:tailwind, "~> 0.2.0", runtime: Mix.env() == :dev},
-      {:heroicons,
-       github: "tailwindlabs/heroicons",
-       tag: "v2.1.1",
-       sparse: "optimized",
-       app: false,
-       compile: false,
-       depth: 1},
       {:swoosh, "~> 1.5"},
       {:finch, "~> 0.13"},
       {:telemetry_metrics, "~> 1.0"},
@@ -60,6 +51,16 @@ defmodule Ignite.MixProject do
       {:bandit, "~> 1.5"},
       {:burrito, "~> 1.2.0"},
       {:muontrap, "~> 1.5"},
+      
+      # Database dependencies
+      {:ecto_sql, "~> 3.10"},
+      {:ecto_sqlite3, "~> 0.21"},
+      {:phoenix_ecto, "~> 4.4"},
+      
+      # GraphQL dependencies
+      {:absinthe, "~> 1.7"},
+      {:absinthe_phoenix, "~> 2.0"},
+      {:absinthe_plug, "~> 1.5"},
       
       # Local dependencies
       {:sidekick, path: "sidekick"}
@@ -74,13 +75,10 @@ defmodule Ignite.MixProject do
   # See the documentation for `Mix` for more info on aliases.
   defp aliases do
     [
-      setup: ["deps.get", "assets.setup", "assets.build"],
+      setup: ["deps.get"],
       test: ["test"],
-      "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
-      "assets.build": ["tailwind ignite", "esbuild ignite"],
       "assets.deploy": [
-        "tailwind ignite --minify",
-        "esbuild ignite --minify",
+        "cmd pnpm run build",
         "phx.digest"
       ]
     ]

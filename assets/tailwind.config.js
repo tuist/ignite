@@ -7,7 +7,7 @@ const path = require("path")
 
 module.exports = {
   content: [
-    "./js/**/*.js",
+    "./js/**/*.{js,vue}",
     "../lib/ignite_web.ex",
     "../lib/ignite_web/**/*.*ex"
   ],
@@ -20,6 +20,9 @@ module.exports = {
   },
   plugins: [
     require("@tailwindcss/forms"),
+    require("@tailwindcss/typography"),
+    require("@tailwindcss/aspect-ratio"),
+    require("@tailwindcss/container-queries"),
     // Allows prefixing tailwind classes with LiveView classes to add rules
     // only when LiveView classes are applied, for example:
     //

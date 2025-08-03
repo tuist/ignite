@@ -1,0 +1,125 @@
+syntax = "proto3";
+
+package sidekick;
+
+// The Sidekick service provides platform-specific operations for macOS
+service Sidekick {
+  // Health check
+  rpc HealthCheck(Empty) returns (Empty);
+  
+  // Project operations
+  rpc SetProjectPath(SetProjectPathRequest) returns (Empty);
+  
+  // Xcode operations
+  rpc GetXcodeVersion(Empty) returns (XcodeVersionResponse);
+  
+  // Destination operations
+  rpc ListDestinations(Empty) returns (ListDestinationsResponse);
+  
+  // Simulator operations
+  rpc ListSimulators(Empty) returns (ListSimulatorsResponse);
+  rpc BootSimulator(BootSimulatorRequest) returns (Empty);
+  rpc ShutdownSimulator(ShutdownSimulatorRequest) returns (Empty);
+  
+  // Device operations
+  rpc ListDevices(Empty) returns (ListDevicesResponse);
+  
+  // Build operations
+  rpc CompileProject(CompileProjectRequest) returns (CompileProjectResponse);
+  rpc RunTests(RunTestsRequest) returns (RunTestsResponse);
+}
+
+message Empty {}
+
+message SetProjectPathRequest {
+  string path = 1;
+}
+
+message XcodeVersionResponse {
+  string version = 1;
+  string build = 2;
+}
+
+// Destination represents a build/run destination (simulator or device)
+message Destination {
+  string id = 1;
+  string name = 2;
+  string platform = 3; // iOS, watchOS, tvOS, etc.
+  string os_version = 4;
+  string device_type = 5; // iPhone 15, Apple Watch Series 9, etc.
+  DestinationType type = 6;
+  string state = 7; // For simulators: Shutdown, Booted, etc.
+  bool is_available = 8;
+}
+
+enum DestinationType {
+  SIMULATOR = 0;
+  DEVICE = 1;
+}
+
+message ListDestinationsResponse {
+  repeated Destination destinations = 1;
+}
+
+message Simulator {
+  string id = 1;
+  string name = 2;
+  string device_type = 3;
+  string runtime = 4;
+  string state = 5;
+}
+
+message ListSimulatorsResponse {
+  repeated Simulator simulators = 1;
+}
+
+message BootSimulatorRequest {
+  string identifier = 1;
+}
+
+message ShutdownSimulatorRequest {
+  string identifier = 1;
+}
+
+message Device {
+  string id = 1;
+  string name = 2;
+  string model = 3;
+  string ios_version = 4;
+  bool connected = 5;
+}
+
+message ListDevicesResponse {
+  repeated Device devices = 1;
+}
+
+message CompileProjectRequest {
+  string project_path = 1;
+  string scheme = 2;
+  string configuration = 3;
+  string destination = 4;
+}
+
+message CompileProjectResponse {
+  bool success = 1;
+  string output = 2;
+  string error = 3;
+  int32 exit_code = 4;
+}
+
+message RunTestsRequest {
+  string project_path = 1;
+  string scheme = 2;
+  string configuration = 3;
+  string destination = 4;
+}
+
+message RunTestsResponse {
+  bool success = 1;
+  string output = 2;
+  string error = 3;
+  int32 exit_code = 4;
+  int32 tests_run = 5;
+  int32 tests_passed = 6;
+  int32 tests_failed = 7;
+}

@@ -6,6 +6,8 @@
     sops = "3.9.3"
     age = "1.2.1"
     "npm:wrangler" = "4.27.0"
+    "pnpm" = "10.14"
+    tuist = "4.57.0"
 
 [hooks]
     postinstall = "mise run install"

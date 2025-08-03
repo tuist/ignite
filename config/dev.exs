@@ -15,8 +15,7 @@ config :ignite, IgniteWeb.Endpoint,
   debug_errors: true,
   secret_key_base: "1569U+qdB8nH7E8ZrVdiim7+YtGBQTyhkR0pKgsR2tCqbDmdAR+Nb6DnQbJUkw6E",
   watchers: [
-    esbuild: {Esbuild, :install_and_run, [:ignite, ~w(--sourcemap=inline --watch)]},
-    tailwind: {Tailwind, :install_and_run, [:ignite, ~w(--watch)]}
+    pnpm: ["run", "dev", cd: Path.expand("../", __DIR__)]
   ]
 
 # ## SSL Support
@@ -77,3 +76,10 @@ config :swoosh, :api_client, false
 # Browser launcher configuration
 # Set to false to disable automatic browser launching
 config :ignite, :launch_browser, true
+
+# Configure your database using XDG conventions
+# Database configuration is in runtime.exs to use XDG paths
+# Additional dev-specific settings:
+config :ignite, Ignite.Repo,
+  stacktrace: true,
+  show_sensitive_data_on_connection_error: true

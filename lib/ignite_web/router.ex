@@ -13,25 +13,41 @@ defmodule IgniteWeb.Router do
   pipeline :api do
     plug :accepts, ["json"]
   end
-
-  scope "/", IgniteWeb do
-    pipe_through :browser
-
-    get "/", PageController, :home
+  
+  pipeline :graphql do
+    plug :accepts, ["json"]
+  end
+  
+  pipeline :app do
+    plug :accepts, ["html"]
+    plug :fetch_session
+    plug :protect_from_forgery
+    plug :put_secure_browser_headers
   end
 
-  # Other scopes may use custom stacks.
-  # scope "/api", IgniteWeb do
-  #   pipe_through :api
-  # end
+  scope "/", IgniteWeb do
+    pipe_through :app
+    get "/", AppController, :index
+  end
+  
+
+  # GraphQL endpoints
+  scope "/api" do
+    pipe_through :graphql
+    
+    forward "/graphql", Absinthe.Plug,
+      schema: IgniteWeb.GraphQL.Schema,
+      context: %{pubsub: IgniteWeb.Endpoint}
+      
+    if Application.compile_env(:ignite, :dev_routes) do
+      forward "/graphiql", Absinthe.Plug.GraphiQL,
+        schema: IgniteWeb.GraphQL.Schema,
+        socket: IgniteWeb.AbsintheSocket
+    end
+  end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:ignite, :dev_routes) do
-    # If you want to use the LiveDashboard in production, you should put
-    # it behind authentication and allow only admins to access it.
-    # If your application does not have an admins-only section yet,
-    # you can use Plug.BasicAuth to set up some basic authentication
-    # as long as you are also using SSL (which you should anyway).
     import Phoenix.LiveDashboard.Router
 
     scope "/dev" do

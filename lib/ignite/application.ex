@@ -7,16 +7,23 @@ defmodule Ignite.Application do
 
   @impl true
   def start(_type, _args) do
+    # Run migrations before starting the application
+    migrate()
+    
     children = [
       IgniteWeb.Telemetry,
       {DNSCluster, query: Application.get_env(:ignite, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Ignite.PubSub},
       # Start the Finch HTTP client for sending emails
       {Finch, name: Ignite.Finch},
+      # Start the Ecto repository
+      Ignite.Repo,
       # Start Sidekick for platform-specific operations
       sidekick_spec(),
       # Start to serve requests, typically the last entry
       IgniteWeb.Endpoint,
+      # Start Absinthe Subscription supervision tree AFTER Endpoint
+      {Absinthe.Subscription, IgniteWeb.Endpoint},
       # Launch browser after endpoint is started
       browser_launcher_spec()
     ]
@@ -75,5 +82,21 @@ defmodule Ignite.Application do
   def config_change(changed, _new, removed) do
     IgniteWeb.Endpoint.config_change(changed, removed)
     :ok
+  end
+  
+  defp migrate do
+    # Ensure the repo is started before running migrations
+    {:ok, _} = Application.ensure_all_started(:ecto_sql)
+    {:ok, _} = Ignite.Repo.start_link()
+    
+    # Run migrations
+    path = Application.app_dir(:ignite, "priv/repo/migrations")
+    Ecto.Migrator.run(Ignite.Repo, path, :up, all: true)
+    
+    # Stop the repo as it will be started again by the supervisor
+    Ignite.Repo.stop()
+  rescue
+    error ->
+      IO.puts("Warning: Could not run migrations: #{inspect(error)}")
   end
 end

@@ -33,12 +33,14 @@ export default defineConfig({
   server: {
     port: 5173,
     strictPort: true, // Fail if port is in use
+    host: 'localhost',
     cors: {
-      origin: true,
+      origin: ['http://localhost:4000', 'http://127.0.0.1:4000'],
       credentials: true
     },
     hmr: {
-      host: 'localhost'
+      host: 'localhost',
+      port: 5173
     }
   }
 })

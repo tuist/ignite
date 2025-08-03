@@ -3,25 +3,25 @@ const html = `<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ignite - Apple App Development in the AI World | by Tuist</title>
-    <meta name="description" content="Build Apple apps with AI-powered development tools. Web-based coding experience that helps you ignite your ideas and turn them into reality. Install with one command - no sudo required.">
+    <title>Ignite - App Development in the AI World | by Tuist</title>
+    <meta name="description" content="Build apps with AI-powered development tools. Web-based coding experience that helps you ignite your ideas and turn them into reality. Install with one command - no sudo required.">
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://ignite.tuist.dev/">
-    <meta property="og:title" content="Ignite - Apple App Development in the AI World">
-    <meta property="og:description" content="Build Apple apps with AI-powered development tools. Web-based coding experience that helps you ignite your ideas and turn them into reality.">
+    <meta property="og:title" content="Ignite - App Development in the AI World">
+    <meta property="og:description" content="Build apps with AI-powered development tools. Web-based coding experience that helps you ignite your ideas and turn them into reality.">
     <meta property="og:image" content="https://ignite.tuist.dev/og.jpeg">
     
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://ignite.tuist.dev/">
-    <meta property="twitter:title" content="Ignite - Apple App Development in the AI World">
-    <meta property="twitter:description" content="Build Apple apps with AI-powered development tools. Web-based coding experience that helps you ignite your ideas and turn them into reality.">
+    <meta property="twitter:title" content="Ignite - App Development in the AI World">
+    <meta property="twitter:description" content="Build apps with AI-powered development tools. Web-based coding experience that helps you ignite your ideas and turn them into reality.">
     <meta property="twitter:image" content="https://ignite.tuist.dev/og.jpeg">
     
     <!-- Additional SEO tags -->
-    <meta name="keywords" content="Apple app development, AI development tools, iOS development, macOS development, web-based IDE, Tuist, Swift development">
+    <meta name="keywords" content="app development, AI development tools, iOS development, macOS development, web-based IDE, Tuist, Swift development, mobile development">
     <meta name="author" content="Tuist">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://ignite.tuist.dev/">
@@ -108,6 +108,14 @@ const html = `<!DOCTYPE html>
             color: white;
             font-weight: 600;
             letter-spacing: 0.3px;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+        
+        .by-tuist:hover {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(124, 58, 237, 0.2);
         }
 
         .hero {
@@ -119,12 +127,34 @@ const html = `<!DOCTYPE html>
             font-size: clamp(32px, 5vw, 56px);
             font-weight: 800;
             line-height: 1.1;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
             letter-spacing: -0.03em;
             background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+        }
+        
+        .license-badge {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(124, 58, 237, 0.15);
+            border: 1px solid rgba(124, 58, 237, 0.3);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            color: var(--terminal-text);
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            margin-bottom: 20px;
+        }
+        
+        .license-badge:hover {
+            background: rgba(124, 58, 237, 0.25);
+            border-color: rgba(124, 58, 237, 0.5);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.15);
         }
 
         .hero .subtitle {
@@ -424,6 +454,12 @@ const html = `<!DOCTYPE html>
                 font-size: 28px;
             }
             
+            .license-badge {
+                font-size: 12px;
+                padding: 5px 12px;
+                margin-bottom: 16px;
+            }
+            
             .hero .subtitle {
                 font-size: 15px;
                 margin-bottom: 24px;
@@ -467,12 +503,15 @@ const html = `<!DOCTYPE html>
         <header>
             <div class="logo-container">
                 <div class="logo">🔥 Ignite</div>
-                <div class="by-tuist">by Tuist</div>
+                <a href="https://tuist.dev" target="_blank" class="by-tuist">by Tuist</a>
             </div>
         </header>
         
         <section class="hero">
-            <h1>Apple App Development<br>in the AI World</h1>
+            <h1>App Development<br>in the AI World</h1>
+            <a href="https://mozilla.org/MPL/2.0/" target="_blank" class="license-badge">
+                Free Software • MPL-2.0
+            </a>
             <p class="subtitle">
                 A web-based coding experience powered by AI
             </p>
@@ -517,7 +556,7 @@ const html = `<!DOCTYPE html>
                     </span>
                     QA
                 </h3>
-                <p>Use our intelligent agents to test your work automatically. Get comprehensive quality assurance without manual effort.</p>
+                <p>Let our intelligent agents test your work automatically. They'll explore your app, identify potential issues, and provide comprehensive quality assurance without manual effort. Our AI agents act like real users, testing flows and catching bugs so you can focus on building great features.</p>
                 <div class="powered-by">
                     <img src="https://github.com/tuist/tuist/blob/main/docs/docs/public/logo.png?raw=true" alt="Tuist Logo">
                     <span>Powered by <a href="https://tuist.io" target="_blank">Tuist</a></span>
@@ -532,7 +571,7 @@ const html = `<!DOCTYPE html>
                     </span>
                     Share
                 </h3>
-                <p>Release and share your creations instantly. Generate live previews and collaborate with others in real-time.</p>
+                <p>Release and share your creations instantly. Generate previews and collaborate with others. Tuist helps you distribute beta builds to testers, deploy to App Stores, and share your work with the world - all from your browser with seamless integration to distribution platforms.</p>
                 <div class="powered-by">
                     <img src="https://github.com/tuist/tuist/blob/main/docs/docs/public/logo.png?raw=true" alt="Tuist Logo">
                     <span>Powered by <a href="https://tuist.io" target="_blank">Tuist</a></span>
@@ -542,6 +581,9 @@ const html = `<!DOCTYPE html>
         
         <footer>
             <p>Built with ❤️ by the Tuist team</p>
+            <p style="margin-top: 8px; font-size: 12px; opacity: 0.7;">
+                Ignite is free software licensed under the <a href="https://mozilla.org/MPL/2.0/" target="_blank" style="color: var(--terminal-text);">Mozilla Public License 2.0</a>
+            </p>
         </footer>
     </div>
     

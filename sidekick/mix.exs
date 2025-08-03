@@ -32,6 +32,9 @@ defmodule Sidekick.MixProject do
       # JSON handling
       {:jason, "~> 1.4"},
       
+      # Platform operations
+      {:orchard, github: "tuist/orchard"},
+      
       # Development dependencies
       {:ex_doc, "~> 0.34", only: :dev, runtime: false},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false}

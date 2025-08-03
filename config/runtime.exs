@@ -100,3 +100,17 @@ if config_env() == :prod do
   #
   # See https://hexdocs.pm/swoosh/Swoosh.html#module-installation for details.
 end
+
+# Configure database for all environments using XDG conventions
+xdg_data_home = System.get_env("XDG_DATA_HOME") || Path.join(System.user_home!(), ".local/share")
+ignite_data_dir = Path.join(xdg_data_home, "ignite")
+
+# Ensure the directory exists
+File.mkdir_p!(ignite_data_dir)
+
+database_path = System.get_env("DATABASE_PATH") || 
+  Path.join(ignite_data_dir, "ignite.db")
+
+config :ignite, Ignite.Repo,
+  database: database_path,
+  pool_size: String.to_integer(System.get_env("POOL_SIZE") || "5")

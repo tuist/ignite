@@ -45,4 +45,5 @@ Package.resolved
 DerivedData/
 *.xcodeproj
 *.xcworkspace
-
+node_modules/
+Derived/
