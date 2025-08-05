@@ -52,11 +52,11 @@ MIX_ENV=prod mix assets.deploy
 
 # Build Swift executable first
 print_status "Building Swift executable..."
-cd sidekick-swift
-swift build -c release --product sidekick-swift
-SWIFT_BINARY=".build/release/sidekick-swift"
+cd daemon-swift
+swift build -c release --product daemon-swift
+SWIFT_BINARY=".build/release/daemon-swift"
 if [ ! -f "$SWIFT_BINARY" ]; then
-    print_error "Swift build failed - sidekick-swift binary not found at $SWIFT_BINARY"
+    print_error "Swift build failed - daemon-swift binary not found at $SWIFT_BINARY"
     exit 1
 fi
 cd ..
@@ -89,8 +89,8 @@ cp "$BURRITO_BINARY" ignite
 chmod +x ignite
 
 # Copy Swift binary to a temporary location with different name
-cp "sidekick-swift/$SWIFT_BINARY" ./sidekick-swift-executable
-chmod +x ./sidekick-swift-executable
+cp "daemon-swift/$SWIFT_BINARY" ./daemon-swift-executable
+chmod +x ./daemon-swift-executable
 
 # Ensure jq is available for JSON parsing
 if ! command -v jq &> /dev/null; then
@@ -145,12 +145,12 @@ if [ "$LOCAL_MODE" = "false" ]; then
     /usr/bin/codesign --force --sign "$CERTIFICATE_NAME" --timestamp --options runtime --verbose ignite
     
     # Sign the Swift executable
-    /usr/bin/codesign --force --sign "$CERTIFICATE_NAME" --timestamp --options runtime --verbose sidekick-swift-executable
+    /usr/bin/codesign --force --sign "$CERTIFICATE_NAME" --timestamp --options runtime --verbose daemon-swift-executable
 
     # Verify the signatures
     print_status "Verifying signatures..."
     /usr/bin/codesign --verify --deep --verbose ignite
-    /usr/bin/codesign --verify --deep --verbose sidekick-swift-executable
+    /usr/bin/codesign --verify --deep --verbose daemon-swift-executable
 
     print_status "Executables signed successfully"
     
@@ -159,7 +159,7 @@ if [ "$LOCAL_MODE" = "false" ]; then
         print_status "Notarizing executable..."
         
         # Create a zip for notarization (notarytool requires zip format)
-        zip -q -r --symlinks "notarization-bundle.zip" ignite sidekick-swift-executable
+        zip -q -r --symlinks "notarization-bundle.zip" ignite daemon-swift-executable
         
         # Submit for notarization and get submission ID
         RAW_JSON=$(xcrun notarytool submit "notarization-bundle.zip" \
@@ -216,9 +216,9 @@ else
 fi
 
 # Ensure we have the Swift executable in the current directory
-if [ -f "sidekick-swift-executable" ]; then
+if [ -f "daemon-swift-executable" ]; then
     # Move it to a safe name that won't conflict with the directory
-    mv sidekick-swift-executable ./sidekick-swift-binary
+    mv daemon-swift-executable ./daemon-swift-binary
 else
     print_error "Swift executable not found!"
     exit 1
@@ -226,7 +226,7 @@ fi
 
 # Create the distribution archive with both executables
 print_status "Creating distribution archive..."
-tar -czf ignite-macos.tar.gz ignite sidekick-swift-binary
+tar -czf ignite-macos.tar.gz ignite daemon-swift-binary
 
 # Rename the binary in the archive to the correct name
 print_status "Adjusting archive contents..."
@@ -234,8 +234,8 @@ print_status "Adjusting archive contents..."
 mkdir -p temp_archive
 cd temp_archive
 tar -xzf ../ignite-macos.tar.gz
-mv sidekick-swift-binary sidekick-swift
-tar -czf ../ignite-macos-fixed.tar.gz ignite sidekick-swift
+mv daemon-swift-binary daemon-swift
+tar -czf ../ignite-macos-fixed.tar.gz ignite daemon-swift
 cd ..
 mv ignite-macos-fixed.tar.gz ignite-macos.tar.gz
 rm -rf temp_archive
@@ -257,11 +257,11 @@ if [ "$LOCAL_MODE" = "false" ] && [ -n "$KEYCHAIN_PATH" ]; then
 fi
 
 # Clean up temporary files
-rm -f ignite sidekick-swift-binary sidekick-swift-executable
+rm -f ignite daemon-swift-binary daemon-swift-executable
 rm -rf burrito_out
 
 print_status "Release build complete!"
 echo "Artifacts created:"
-echo "  - ignite-macos.tar.gz (contains ignite and sidekick-swift executables)"
+echo "  - ignite-macos.tar.gz (contains ignite and daemon-swift executables)"
 echo "  - SHA256.txt"
 echo "  - SHA512.txt"

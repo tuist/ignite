@@ -1,9 +1,9 @@
-defmodule Sidekick.MixProject do
+defmodule Daemon.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :sidekick,
+      app: :daemon,
       version: "0.1.0",
       elixir: "~> 1.18",
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -28,16 +28,19 @@ defmodule Sidekick.MixProject do
       # gRPC dependencies
       {:grpc, "~> 0.7"},
       {:protobuf, "~> 0.12"},
-      
+
       # JSON handling
       {:jason, "~> 1.4"},
-      
+
       # Platform operations
       {:orchard, github: "tuist/orchard"},
-      
+      {:muontrap, "~> 1.0"},
+
       # Development dependencies
       {:ex_doc, "~> 0.34", only: :dev, runtime: false},
-      {:credo, "~> 1.7", only: [:dev, :test], runtime: false}
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:quokka, "~> 2.10", only: [:dev, :test], runtime: false},
+      {:mimic, "~> 1.7", only: :test}
     ]
   end
 

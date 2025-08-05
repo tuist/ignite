@@ -26,6 +26,11 @@ defmodule IgniteWeb.GraphQL.Schema do
     field :devices, list_of(:device) do
       resolve &Resolvers.Simulator.list_devices/3
     end
+    
+    @desc "Get build environment info"
+    field :build_environment_info, :build_environment_info do
+      resolve &Resolvers.Simulator.get_build_environment_info/3
+    end
   end
   
   mutation do

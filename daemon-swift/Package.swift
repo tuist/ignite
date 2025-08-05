@@ -4,14 +4,14 @@
 import PackageDescription
 
 let package = Package(
-    name: "sidekick-swift",
+    name: "daemon-swift",
     platforms: [
         .macOS(.v13)
     ],
     products: [
         .executable(
-            name: "sidekick-swift",
-            targets: ["sidekick-swift"]
+            name: "daemon-swift",
+            targets: ["daemon-swift"]
         )
     ],
     dependencies: [
@@ -19,11 +19,11 @@ let package = Package(
     ],
     targets: [
         .executableTarget(
-            name: "sidekick-swift",
+            name: "daemon-swift",
             dependencies: [
                 .product(name: "ArgumentParser", package: "swift-argument-parser")
             ],
-            path: "Sources/sidekick-swift"
+            path: "Sources/daemon-swift"
         )
     ]
 )

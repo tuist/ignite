@@ -2,6 +2,8 @@
 set -eo pipefail
 
 (cd web && mix deps.get)
-(cd sidekick && mix deps.get)
-(cd app && tuist install)
+(cd daemon && mix deps.get)
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  (cd app && tuist install)
+fi
 pnpm install

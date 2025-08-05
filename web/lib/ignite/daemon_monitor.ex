@@ -1,4 +1,4 @@
-defmodule Ignite.SidekickMonitor do
+defmodule Ignite.DaemonMonitor do
   use GenServer
   require Logger
 
@@ -16,12 +16,12 @@ defmodule Ignite.SidekickMonitor do
   end
 
   def handle_info(:check_connection, state) do
-    connected = check_sidekick_connection()
+    connected = check_daemon_connection()
     
     # Only broadcast if status changed
     if connected != state.connected do
-      Logger.info("Sidekick connection status changed: #{connected}")
-      Phoenix.PubSub.broadcast(Ignite.PubSub, "sidekick_status", {:sidekick_status, connected})
+      Logger.info("Daemon connection status changed: #{connected}")
+      Phoenix.PubSub.broadcast(Ignite.PubSub, "daemon_status", {:daemon_status, connected})
     end
     
     # Schedule next check
@@ -34,8 +34,8 @@ defmodule Ignite.SidekickMonitor do
     Process.send_after(self(), :check_connection, @check_interval)
   end
 
-  defp check_sidekick_connection do
-    case Sidekick.health_check(Ignite.Sidekick) do
+  defp check_daemon_connection do
+    case Daemon.health_check(Ignite.Daemon) do
       :ok -> true
       _ -> false
     end

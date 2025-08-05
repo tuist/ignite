@@ -7,14 +7,14 @@ echo "Building all components..."
 echo "→ Building web..."
 mise run build:web
 
-echo "→ Building sidekick..."
-mise run build:sidekick
+echo "→ Building daemon..."
+mise run build:daemon
 
 echo "→ Building app..."
 mise run build:app
 
-echo "→ Building sidekick-swift..."
-mise run build:sidekick-swift
+echo "→ Building daemon-swift..."
+mise run build:daemon-swift
 
 echo "→ Building worker..."
 mise run build:worker

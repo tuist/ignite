@@ -1,4 +1,4 @@
-defmodule Sidekick.DestinationType do
+defmodule Daemon.DestinationType do
   @moduledoc false
 
   use Protobuf, enum: true, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
@@ -7,13 +7,21 @@ defmodule Sidekick.DestinationType do
   field :DEVICE, 1
 end
 
-defmodule Sidekick.Empty do
+defmodule Daemon.Empty do
   @moduledoc false
 
   use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
 end
 
-defmodule Sidekick.XcodeVersionResponse do
+defmodule Daemon.SetProjectPathRequest do
+  @moduledoc false
+
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+
+  field :path, 1, type: :string
+end
+
+defmodule Daemon.XcodeVersionResponse do
   @moduledoc false
 
   use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
@@ -22,7 +30,7 @@ defmodule Sidekick.XcodeVersionResponse do
   field :build, 2, type: :string
 end
 
-defmodule Sidekick.Destination do
+defmodule Daemon.Destination do
   @moduledoc false
 
   use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
@@ -32,20 +40,20 @@ defmodule Sidekick.Destination do
   field :platform, 3, type: :string
   field :os_version, 4, type: :string, json_name: "osVersion"
   field :device_type, 5, type: :string, json_name: "deviceType"
-  field :type, 6, type: Sidekick.DestinationType, enum: true
+  field :type, 6, type: Daemon.DestinationType, enum: true
   field :state, 7, type: :string
   field :is_available, 8, type: :bool, json_name: "isAvailable"
 end
 
-defmodule Sidekick.ListDestinationsResponse do
+defmodule Daemon.ListDestinationsResponse do
   @moduledoc false
 
   use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
 
-  field :destinations, 1, repeated: true, type: Sidekick.Destination
+  field :destinations, 1, repeated: true, type: Daemon.Destination
 end
 
-defmodule Sidekick.Simulator do
+defmodule Daemon.Simulator do
   @moduledoc false
 
   use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
@@ -57,23 +65,15 @@ defmodule Sidekick.Simulator do
   field :state, 5, type: :string
 end
 
-defmodule Sidekick.ListSimulatorsResponse do
+defmodule Daemon.ListSimulatorsResponse do
   @moduledoc false
 
   use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
 
-  field :simulators, 1, repeated: true, type: Sidekick.Simulator
+  field :simulators, 1, repeated: true, type: Daemon.Simulator
 end
 
-defmodule Sidekick.BootSimulatorRequest do
-  @moduledoc false
-
-  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
-
-  field :identifier, 1, type: :string
-end
-
-defmodule Sidekick.ShutdownSimulatorRequest do
+defmodule Daemon.BootSimulatorRequest do
   @moduledoc false
 
   use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
@@ -81,7 +81,15 @@ defmodule Sidekick.ShutdownSimulatorRequest do
   field :identifier, 1, type: :string
 end
 
-defmodule Sidekick.Device do
+defmodule Daemon.ShutdownSimulatorRequest do
+  @moduledoc false
+
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+
+  field :identifier, 1, type: :string
+end
+
+defmodule Daemon.Device do
   @moduledoc false
 
   use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
@@ -93,15 +101,15 @@ defmodule Sidekick.Device do
   field :connected, 5, type: :bool
 end
 
-defmodule Sidekick.ListDevicesResponse do
+defmodule Daemon.ListDevicesResponse do
   @moduledoc false
 
   use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
 
-  field :devices, 1, repeated: true, type: Sidekick.Device
+  field :devices, 1, repeated: true, type: Daemon.Device
 end
 
-defmodule Sidekick.CompileProjectRequest do
+defmodule Daemon.CompileProjectRequest do
   @moduledoc false
 
   use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
@@ -112,7 +120,7 @@ defmodule Sidekick.CompileProjectRequest do
   field :destination, 4, type: :string
 end
 
-defmodule Sidekick.CompileProjectResponse do
+defmodule Daemon.CompileProjectResponse do
   @moduledoc false
 
   use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
@@ -123,7 +131,7 @@ defmodule Sidekick.CompileProjectResponse do
   field :exit_code, 4, type: :int32, json_name: "exitCode"
 end
 
-defmodule Sidekick.RunTestsRequest do
+defmodule Daemon.RunTestsRequest do
   @moduledoc false
 
   use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
@@ -134,7 +142,7 @@ defmodule Sidekick.RunTestsRequest do
   field :destination, 4, type: :string
 end
 
-defmodule Sidekick.RunTestsResponse do
+defmodule Daemon.RunTestsResponse do
   @moduledoc false
 
   use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
@@ -148,32 +156,45 @@ defmodule Sidekick.RunTestsResponse do
   field :tests_failed, 7, type: :int32, json_name: "testsFailed"
 end
 
-defmodule Sidekick.Sidekick.Service do
+defmodule Daemon.BuildEnvironmentInfoResponse do
   @moduledoc false
 
-  use GRPC.Service, name: "sidekick.Sidekick", protoc_gen_elixir_version: "0.15.0"
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
 
-  rpc :HealthCheck, Sidekick.Empty, Sidekick.Empty
-
-  rpc :GetXcodeVersion, Sidekick.Empty, Sidekick.XcodeVersionResponse
-
-  rpc :ListDestinations, Sidekick.Empty, Sidekick.ListDestinationsResponse
-
-  rpc :ListSimulators, Sidekick.Empty, Sidekick.ListSimulatorsResponse
-
-  rpc :BootSimulator, Sidekick.BootSimulatorRequest, Sidekick.Empty
-
-  rpc :ShutdownSimulator, Sidekick.ShutdownSimulatorRequest, Sidekick.Empty
-
-  rpc :ListDevices, Sidekick.Empty, Sidekick.ListDevicesResponse
-
-  rpc :CompileProject, Sidekick.CompileProjectRequest, Sidekick.CompileProjectResponse
-
-  rpc :RunTests, Sidekick.RunTestsRequest, Sidekick.RunTestsResponse
+  field :local_ip, 1, type: :string, json_name: "localIp"
+  field :tailscale_url, 2, type: :string, json_name: "tailscaleUrl"
 end
 
-defmodule Sidekick.Sidekick.Stub do
+defmodule Daemon.Daemon.Service do
   @moduledoc false
 
-  use GRPC.Stub, service: Sidekick.Sidekick.Service
+  use GRPC.Service, name: "daemon.Daemon", protoc_gen_elixir_version: "0.15.0"
+
+  rpc :HealthCheck, Daemon.Empty, Daemon.Empty
+
+  rpc :SetProjectPath, Daemon.SetProjectPathRequest, Daemon.Empty
+
+  rpc :GetXcodeVersion, Daemon.Empty, Daemon.XcodeVersionResponse
+
+  rpc :ListDestinations, Daemon.Empty, Daemon.ListDestinationsResponse
+
+  rpc :ListSimulators, Daemon.Empty, Daemon.ListSimulatorsResponse
+
+  rpc :BootSimulator, Daemon.BootSimulatorRequest, Daemon.Empty
+
+  rpc :ShutdownSimulator, Daemon.ShutdownSimulatorRequest, Daemon.Empty
+
+  rpc :ListDevices, Daemon.Empty, Daemon.ListDevicesResponse
+
+  rpc :CompileProject, Daemon.CompileProjectRequest, Daemon.CompileProjectResponse
+
+  rpc :RunTests, Daemon.RunTestsRequest, Daemon.RunTestsResponse
+
+  rpc :GetBuildEnvironmentInfo, Daemon.Empty, Daemon.BuildEnvironmentInfoResponse
+end
+
+defmodule Daemon.Daemon.Stub do
+  @moduledoc false
+
+  use GRPC.Stub, service: Daemon.Daemon.Service
 end

@@ -18,8 +18,8 @@ defmodule Ignite.Application do
       {Finch, name: Ignite.Finch},
       # Start the Ecto repository
       Ignite.Repo,
-      # Start Sidekick for platform-specific operations
-      sidekick_spec(),
+      # Start Daemon for platform-specific operations
+      daemon_spec(),
       # Start to serve requests, typically the last entry
       IgniteWeb.Endpoint,
       # Start Absinthe Subscription supervision tree AFTER Endpoint
@@ -34,7 +34,7 @@ defmodule Ignite.Application do
     Supervisor.start_link(children, opts)
   end
 
-  defp sidekick_spec do
+  defp daemon_spec do
     # Use the same host configuration as the Phoenix endpoint
     endpoint_config = Application.get_env(:ignite, IgniteWeb.Endpoint, [])
     
@@ -56,7 +56,7 @@ defmodule Ignite.Application do
     
     server_url = "#{host}:#{grpc_port}"
     
-    {Sidekick, server_url: server_url, name: Ignite.Sidekick}
+    {Daemon, server_url: server_url, name: Ignite.Daemon}
   end
 
   defp browser_launcher_spec do

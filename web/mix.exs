@@ -63,7 +63,7 @@ defmodule Ignite.MixProject do
       {:absinthe_plug, "~> 1.5"},
       
       # Local dependencies
-      {:sidekick, path: "../sidekick"}
+      {:daemon, path: "../daemon"}
     ]
   end
 

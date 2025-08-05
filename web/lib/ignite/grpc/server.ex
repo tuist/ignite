@@ -1,5 +1,5 @@
 defmodule Ignite.GRPC.Server do
-  use GRPC.Server, service: Sidekick.Sidekick.Service
+  use GRPC.Server, service: Daemon.Daemon.Service
   require Logger
 
   @doc """
@@ -7,7 +7,7 @@ defmodule Ignite.GRPC.Server do
   """
   def health_check(_request, _stream) do
     Logger.debug("GRPC: health_check called")
-    %Sidekick.Empty{}
+    %Daemon.Empty{}
   end
 
   @doc """
@@ -22,7 +22,7 @@ defmodule Ignite.GRPC.Server do
     case Ignite.Repo.insert(project, on_conflict: :replace_all, conflict_target: :path) do
       {:ok, _project} ->
         Logger.info("Project path set: #{request.path}")
-        %Sidekick.Empty{}
+        %Daemon.Empty{}
       
       {:error, changeset} ->
         Logger.error("Failed to save project: #{inspect(changeset.errors)}")
@@ -42,13 +42,13 @@ defmodule Ignite.GRPC.Server do
         version = parse_xcode_version(lines)
         build = parse_xcode_build(lines)
         
-        %Sidekick.XcodeVersionResponse{
+        %Daemon.XcodeVersionResponse{
           version: version || "Unknown",
           build: build || "Unknown"
         }
       
       {_output, _} ->
-        %Sidekick.XcodeVersionResponse{
+        %Daemon.XcodeVersionResponse{
           version: "Not installed",
           build: "N/A"
         }
@@ -70,7 +70,7 @@ defmodule Ignite.GRPC.Server do
     # Combine all destinations
     destinations = simulators ++ devices
     
-    %Sidekick.ListDestinationsResponse{destinations: destinations}
+    %Daemon.ListDestinationsResponse{destinations: destinations}
   end
 
   @doc """
@@ -82,10 +82,10 @@ defmodule Ignite.GRPC.Server do
     case System.cmd("xcrun", ["simctl", "list", "devices", "available", "-j"]) do
       {output, 0} ->
         simulators = parse_simulators(output)
-        %Sidekick.ListSimulatorsResponse{simulators: simulators}
+        %Daemon.ListSimulatorsResponse{simulators: simulators}
       
       {_output, _} ->
-        %Sidekick.ListSimulatorsResponse{simulators: []}
+        %Daemon.ListSimulatorsResponse{simulators: []}
     end
   end
 
@@ -97,7 +97,7 @@ defmodule Ignite.GRPC.Server do
     
     case System.cmd("xcrun", ["simctl", "boot", request.identifier]) do
       {_output, 0} ->
-        %Sidekick.Empty{}
+        %Daemon.Empty{}
       
       {error, _} ->
         Logger.error("Failed to boot simulator: #{error}")
@@ -113,7 +113,7 @@ defmodule Ignite.GRPC.Server do
     
     case System.cmd("xcrun", ["simctl", "shutdown", request.identifier]) do
       {_output, 0} ->
-        %Sidekick.Empty{}
+        %Daemon.Empty{}
       
       {error, _} ->
         Logger.error("Failed to shutdown simulator: #{error}")
@@ -130,11 +130,11 @@ defmodule Ignite.GRPC.Server do
     case System.cmd("xcrun", ["devicectl", "list", "devices", "-j"]) do
       {output, 0} ->
         devices = parse_devices(output)
-        %Sidekick.ListDevicesResponse{devices: devices}
+        %Daemon.ListDevicesResponse{devices: devices}
       
       {_output, _} ->
         # Fallback to empty list if devicectl is not available
-        %Sidekick.ListDevicesResponse{devices: []}
+        %Daemon.ListDevicesResponse{devices: []}
     end
   end
 
@@ -148,7 +148,7 @@ defmodule Ignite.GRPC.Server do
     
     case System.cmd("xcodebuild", args, stderr_to_stdout: true) do
       {output, 0} ->
-        %Sidekick.CompileProjectResponse{
+        %Daemon.CompileProjectResponse{
           success: true,
           output: output,
           error: "",
@@ -156,7 +156,7 @@ defmodule Ignite.GRPC.Server do
         }
       
       {output, exit_code} ->
-        %Sidekick.CompileProjectResponse{
+        %Daemon.CompileProjectResponse{
           success: false,
           output: output,
           error: "Build failed",
@@ -177,7 +177,7 @@ defmodule Ignite.GRPC.Server do
       {output, 0} ->
         {tests_run, tests_passed, tests_failed} = parse_test_results(output)
         
-        %Sidekick.RunTestsResponse{
+        %Daemon.RunTestsResponse{
           success: true,
           output: output,
           error: "",
@@ -190,7 +190,7 @@ defmodule Ignite.GRPC.Server do
       {output, exit_code} ->
         {tests_run, tests_passed, tests_failed} = parse_test_results(output)
         
-        %Sidekick.RunTestsResponse{
+        %Daemon.RunTestsResponse{
           success: false,
           output: output,
           error: "Tests failed",
@@ -199,6 +199,26 @@ defmodule Ignite.GRPC.Server do
           tests_passed: tests_passed,
           tests_failed: tests_failed
         }
+    end
+  end
+
+  @doc """
+  Get build environment info including local IP and Tailscale URL
+  This asks daemon for the information since it has access to the local system
+  """
+  def get_build_environment_info(_request, _stream) do
+    Logger.debug("GRPC: get_build_environment_info called - asking daemon")
+    
+    case Daemon.get_build_environment_info(Ignite.Daemon) do
+      {:ok, info} ->
+        %Daemon.BuildEnvironmentInfoResponse{
+          local_ip: info.local_ip,
+          tailscale_url: info.tailscale_url || ""
+        }
+      
+      {:error, reason} ->
+        Logger.error("Failed to get build environment info from daemon: #{inspect(reason)}")
+        raise GRPC.RPCError, status: :internal, message: "Failed to get build environment info"
     end
   end
 
@@ -234,7 +254,7 @@ defmodule Ignite.GRPC.Server do
           {platform, version} = parse_runtime(runtime)
           
           Enum.map(device_list, fn device ->
-            %Sidekick.Destination{
+            %Daemon.Destination{
               id: Map.get(device, "udid", ""),
               name: Map.get(device, "name", ""),
               platform: platform,
@@ -261,7 +281,7 @@ defmodule Ignite.GRPC.Server do
           device_props = Map.get(device, "deviceProperties", %{})
           hardware_props = Map.get(device, "hardwareProperties", %{})
           
-          %Sidekick.Destination{
+          %Daemon.Destination{
             id: Map.get(device, "identifier", ""),
             name: Map.get(device_props, "name", ""),
             platform: "iOS", # Devices are typically iOS
@@ -328,7 +348,7 @@ defmodule Ignite.GRPC.Server do
         
         Enum.flat_map(devices, fn {runtime, device_list} ->
           Enum.map(device_list, fn device ->
-            %Sidekick.Simulator{
+            %Daemon.Simulator{
               id: Map.get(device, "udid", ""),
               name: Map.get(device, "name", ""),
               device_type: Map.get(device, "deviceTypeIdentifier", ""),
@@ -349,7 +369,7 @@ defmodule Ignite.GRPC.Server do
         devices = Map.get(data, "result", %{}) |> Map.get("devices", [])
         
         Enum.map(devices, fn device ->
-          %Sidekick.Device{
+          %Daemon.Device{
             id: Map.get(device, "identifier", ""),
             name: Map.get(device, "deviceProperties", %{}) |> Map.get("name", ""),
             model: Map.get(device, "hardwareProperties", %{}) |> Map.get("productType", ""),

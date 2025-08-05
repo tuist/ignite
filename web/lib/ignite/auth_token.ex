@@ -1,7 +1,7 @@
 defmodule Ignite.AuthToken do
   @moduledoc """
   Manages the authentication token for GRPC communication between
-  the server and Sidekick.
+  the server and Daemon.
   """
   
   use Agent
