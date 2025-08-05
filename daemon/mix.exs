@@ -28,17 +28,18 @@ defmodule Daemon.MixProject do
       # gRPC dependencies
       {:grpc, "~> 0.7"},
       {:protobuf, "~> 0.12"},
-      
+
       # JSON handling
       {:jason, "~> 1.4"},
-      
+
       # Platform operations
       {:orchard, github: "tuist/orchard"},
       {:muontrap, "~> 1.0"},
-      
+
       # Development dependencies
       {:ex_doc, "~> 0.34", only: :dev, runtime: false},
-      {:credo, "~> 1.7", only: [:dev, :test], runtime: false}
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:quokka, "~> 2.10", only: [:dev, :test], runtime: false}
     ]
   end
 

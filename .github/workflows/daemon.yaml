@@ -2,15 +2,15 @@ name: Daemon CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - 'daemon/**'
-      - '.github/workflows/daemon.yaml'
+      - "daemon/**"
+      - ".github/workflows/daemon.yaml"
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - 'daemon/**'
-      - '.github/workflows/daemon.yaml'
+      - "daemon/**"
+      - ".github/workflows/daemon.yaml"
 
 jobs:
   build:
@@ -19,28 +19,21 @@ jobs:
     defaults:
       run:
         working-directory: daemon
-    
+
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Elixir
-      uses: erlef/setup-beam@v1
-      with:
-        elixir-version: '1.15.7'
-        otp-version: '26.0'
-    
-    - name: Restore dependencies cache
-      uses: actions/cache@v3
-      with:
-        path: daemon/deps
-        key: ${{ runner.os }}-mix-${{ hashFiles('daemon/mix.lock') }}
-        restore-keys: ${{ runner.os }}-mix-
-    
-    - name: Install dependencies
-      run: mix deps.get
-    
-    - name: Compile with warnings as errors
-      run: mix compile --warnings-as-errors
+      - uses: actions/checkout@v4
+
+      - uses: jdx/mise-action@v2
+
+      - name: Restore dependencies cache
+        uses: actions/cache@v3
+        with:
+          path: daemon/deps
+          key: ${{ runner.os }}-mix-${{ hashFiles('daemon/mix.lock') }}
+          restore-keys: ${{ runner.os }}-mix-
+
+      - name: Build
+        run: mise run build:daemon
 
   test:
     name: Test
@@ -48,57 +41,40 @@ jobs:
     defaults:
       run:
         working-directory: daemon
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Elixir
-      uses: erlef/setup-beam@v1
-      with:
-        elixir-version: '1.15.7'
-        otp-version: '26.0'
-    
-    - name: Restore dependencies cache
-      uses: actions/cache@v3
-      with:
-        path: daemon/deps
-        key: ${{ runner.os }}-mix-${{ hashFiles('daemon/mix.lock') }}
-        restore-keys: ${{ runner.os }}-mix-
-    
-    - name: Install dependencies
-      run: mix deps.get
-    
-    - name: Run tests
-      run: mix test
 
-  format:
-    name: Format Check
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: jdx/mise-action@v2
+
+      - name: Restore dependencies cache
+        uses: actions/cache@v3
+        with:
+          path: daemon/deps
+          key: ${{ runner.os }}-mix-${{ hashFiles('daemon/mix.lock') }}
+          restore-keys: ${{ runner.os }}-mix-
+
+      - name: Run tests
+        run: mise run test:daemon
+
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: daemon
-    
+
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Elixir
-      uses: erlef/setup-beam@v1
-      with:
-        elixir-version: '1.15.7'
-        otp-version: '26.0'
-    
-    - name: Restore dependencies cache
-      uses: actions/cache@v3
-      with:
-        path: daemon/deps
-        key: ${{ runner.os }}-mix-${{ hashFiles('daemon/mix.lock') }}
-        restore-keys: ${{ runner.os }}-mix-
-    
-    - name: Install dependencies
-      run: mix deps.get
-    
-    - name: Install Quokka
-      run: mix archive.install hex quokka --force
-    
-    - name: Check formatting with Quokka
-      run: mix quokka.format --check-formatted
+      - uses: actions/checkout@v4
+
+      - uses: jdx/mise-action@v2
+
+      - name: Restore dependencies cache
+        uses: actions/cache@v3
+        with:
+          path: daemon/deps
+          key: ${{ runner.os }}-mix-${{ hashFiles('daemon/mix.lock') }}
+          restore-keys: ${{ runner.os }}-mix-
+
+      - name: Check formatting with Quokka
+        run: mise run lint:daemon

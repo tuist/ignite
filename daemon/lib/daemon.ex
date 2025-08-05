@@ -2,21 +2,23 @@ defmodule Daemon do
   @moduledoc """
   Daemon is a long-running application that establishes a gRPC connection
   to handle platform-specific operations on macOS.
-  
+
   It acts as a bridge between the Phoenix web application and the local
   Swift agent that manages Xcode, simulators, and other native tooling.
   """
 
   use GenServer
+
   require Logger
 
   defstruct [:channel, :server_url, :name, :reconnect_timer]
 
-  @reconnect_interval 5_000 # 5 seconds
+  # 5 seconds
+  @reconnect_interval 5_000
 
   @doc """
   Starts the Daemon service and establishes gRPC connection.
-  
+
   Options:
     * `:server_url` - The gRPC server URL (required)
     * `:name` - The name to register the process as (optional)
@@ -24,7 +26,7 @@ defmodule Daemon do
   def start_link(opts) do
     server_url = Keyword.fetch!(opts, :server_url)
     name = Keyword.get(opts, :name, __MODULE__)
-    
+
     GenServer.start_link(__MODULE__, %{server_url: server_url, name: name}, name: name)
   end
 
@@ -110,14 +112,14 @@ defmodule Daemon do
   @impl true
   def init(%{server_url: server_url, name: name}) do
     Logger.info("Starting Daemon, connecting to #{server_url}")
-    
+
     # Start connection process
     state = %__MODULE__{
       server_url: server_url,
       name: name,
       channel: nil
     }
-    
+
     {:ok, state, {:continue, :connect}}
   end
 
@@ -127,7 +129,7 @@ defmodule Daemon do
       {:ok, channel} ->
         Logger.info("Successfully connected to Daemon agent at #{state.server_url}")
         {:noreply, %{state | channel: channel}}
-        
+
       {:error, reason} ->
         Logger.error("Failed to connect to Daemon agent: #{inspect(reason)}")
         timer = Process.send_after(self(), :reconnect, @reconnect_interval)
@@ -216,87 +218,107 @@ defmodule Daemon do
   defp call_grpc(_channel, method, _params \\ %{}) do
     # Use Orchard to get actual platform information
     case method do
-      :health_check -> :ok
-      :xcode_version -> 
+      :health_check ->
+        :ok
+
+      :xcode_version ->
         # Orchard doesn't provide xcode_version, use system command instead
         case System.find_executable("xcodebuild") do
           nil ->
             {:ok, "Not installed"}
-          
+
           _path ->
             case MuonTrap.cmd("xcodebuild", ["-version"]) do
-              {output, 0} -> 
-                version = output |> String.split("\n") |> List.first() |> String.replace("Xcode ", "")
+              {output, 0} ->
+                version =
+                  output |> String.split("\n") |> List.first() |> String.replace("Xcode ", "")
+
                 {:ok, version}
-              _ -> 
+
+              _ ->
                 {:ok, "Unknown"}
             end
         end
-      :list_simulators -> 
+
+      :list_simulators ->
         case Orchard.Simulator.list() do
-          {:ok, simulators} -> 
-            formatted_simulators = Enum.map(simulators, fn sim ->
-              %{
-                identifier: sim.udid,
-                name: sim.name,
-                display_name: sim.name,
-                device: sim.device_type,
-                os: sim.runtime,
-                runtime: sim.runtime,
-                state: sim.state,
-                is_available: sim.state == "Booted"
-              }
-            end)
+          {:ok, simulators} ->
+            formatted_simulators =
+              Enum.map(simulators, fn sim ->
+                %{
+                  identifier: sim.udid,
+                  name: sim.name,
+                  display_name: sim.name,
+                  device: sim.device_type,
+                  os: sim.runtime,
+                  runtime: sim.runtime,
+                  state: sim.state,
+                  is_available: sim.state == "Booted"
+                }
+              end)
+
             {:ok, formatted_simulators}
-          {:error, reason} -> 
+
+          {:error, reason} ->
             Logger.error("Failed to list simulators: #{inspect(reason)}")
             {:error, reason}
         end
-      :list_devices -> 
+
+      :list_devices ->
         case Orchard.Device.list() do
           {:ok, devices} ->
-            formatted_devices = Enum.map(devices, fn dev ->
-              %{
-                identifier: dev.udid,
-                name: dev.name,
-                display_name: dev.name,
-                device: dev.device_type,
-                state: dev.connection_type
-              }
-            end)
+            formatted_devices =
+              Enum.map(devices, fn dev ->
+                %{
+                  identifier: dev.udid,
+                  name: dev.name,
+                  display_name: dev.name,
+                  device: dev.device_type,
+                  state: dev.connection_type
+                }
+              end)
+
             {:ok, formatted_devices}
+
           {:error, reason} ->
             Logger.error("Failed to list devices: #{inspect(reason)}")
             {:error, reason}
         end
+
       :get_build_environment_info ->
         local_ip = get_local_ip()
         tailscale_url = get_tailscale_url()
-        
-        {:ok, %{
-          local_ip: local_ip,
-          tailscale_url: tailscale_url
-        }}
-      _ -> {:error, "Not implemented"}
+
+        {:ok,
+         %{
+           local_ip: local_ip,
+           tailscale_url: tailscale_url
+         }}
+
+      _ ->
+        {:error, "Not implemented"}
     end
   end
 
   defp get_local_ip do
     # Get the port from the web server configuration (default 9090)
     port = 9090
-    
+
     case :inet.getif() do
       {:ok, interfaces} ->
         # Filter out loopback and get the first valid IP
         interfaces
-        |> Enum.reject(fn {{127, 0, 0, 1}, _, _} -> true; _ -> false end)
+        |> Enum.reject(fn
+          {{127, 0, 0, 1}, _, _} -> true
+          _ -> false
+        end)
         |> Enum.map(fn {ip, _, _} -> :inet.ntoa(ip) |> to_string() end)
         |> List.first()
         |> case do
           nil -> "http://127.0.0.1:#{port}"
           ip -> "http://#{ip}:#{port}"
         end
-      
+
       _ ->
         "http://127.0.0.1:#{port}"
     end
@@ -308,7 +330,7 @@ defmodule Daemon do
       nil ->
         Logger.debug("Tailscale command not found")
         ""
-      
+
       _path ->
         case MuonTrap.cmd("tailscale", ["status", "--json"], stderr_to_stdout: true) do
           {output, 0} ->
@@ -316,20 +338,21 @@ defmodule Daemon do
               {:ok, data} ->
                 self_info = Map.get(data, "Self", %{})
                 dns_name = Map.get(self_info, "DNSName", "")
-                
-                if dns_name != "" do
-                  # Remove trailing dot if present
-                  clean_dns = String.trim_trailing(dns_name, ".")
-                  port = 9090  # Default web server port
-                  "https://#{clean_dns}:#{port}"
-                else
+
+                if dns_name == "" do
                   ""
+                  # Remove trailing dot if present
+                else
+                  clean_dns = String.trim_trailing(dns_name, ".")
+                  # Default web server port
+                  port = 9090
+                  "https://#{clean_dns}:#{port}"
                 end
-              
+
               _ ->
                 ""
             end
-          
+
           {_output, _exit_code} ->
             # Tailscale not running or other error
             Logger.debug("Tailscale is not running or returned an error")

@@ -3,8 +3,8 @@ defmodule Daemon.DestinationType do
 
   use Protobuf, enum: true, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
 
-  field :SIMULATOR, 0
-  field :DEVICE, 1
+  field(:SIMULATOR, 0)
+  field(:DEVICE, 1)
 end
 
 defmodule Daemon.Empty do
@@ -18,8 +18,8 @@ defmodule Daemon.XcodeVersionResponse do
 
   use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
 
-  field :version, 1, type: :string
-  field :build, 2, type: :string
+  field(:version, 1, type: :string)
+  field(:build, 2, type: :string)
 end
 
 defmodule Daemon.Destination do
@@ -27,14 +27,14 @@ defmodule Daemon.Destination do
 
   use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
 
-  field :id, 1, type: :string
-  field :name, 2, type: :string
-  field :platform, 3, type: :string
-  field :os_version, 4, type: :string, json_name: "osVersion"
-  field :device_type, 5, type: :string, json_name: "deviceType"
-  field :type, 6, type: Daemon.DestinationType, enum: true
-  field :state, 7, type: :string
-  field :is_available, 8, type: :bool, json_name: "isAvailable"
+  field(:id, 1, type: :string)
+  field(:name, 2, type: :string)
+  field(:platform, 3, type: :string)
+  field(:os_version, 4, type: :string, json_name: "osVersion")
+  field(:device_type, 5, type: :string, json_name: "deviceType")
+  field(:type, 6, type: Daemon.DestinationType, enum: true)
+  field(:state, 7, type: :string)
+  field(:is_available, 8, type: :bool, json_name: "isAvailable")
 end
 
 defmodule Daemon.ListDestinationsResponse do
@@ -42,7 +42,7 @@ defmodule Daemon.ListDestinationsResponse do
 
   use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
 
-  field :destinations, 1, repeated: true, type: Daemon.Destination
+  field(:destinations, 1, repeated: true, type: Daemon.Destination)
 end
 
 defmodule Daemon.Simulator do
@@ -50,11 +50,11 @@ defmodule Daemon.Simulator do
 
   use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
 
-  field :id, 1, type: :string
-  field :name, 2, type: :string
-  field :device_type, 3, type: :string, json_name: "deviceType"
-  field :runtime, 4, type: :string
-  field :state, 5, type: :string
+  field(:id, 1, type: :string)
+  field(:name, 2, type: :string)
+  field(:device_type, 3, type: :string, json_name: "deviceType")
+  field(:runtime, 4, type: :string)
+  field(:state, 5, type: :string)
 end
 
 defmodule Daemon.ListSimulatorsResponse do
@@ -62,7 +62,7 @@ defmodule Daemon.ListSimulatorsResponse do
 
   use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
 
-  field :simulators, 1, repeated: true, type: Daemon.Simulator
+  field(:simulators, 1, repeated: true, type: Daemon.Simulator)
 end
 
 defmodule Daemon.BootSimulatorRequest do
@@ -70,7 +70,7 @@ defmodule Daemon.BootSimulatorRequest do
 
   use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
 
-  field :identifier, 1, type: :string
+  field(:identifier, 1, type: :string)
 end
 
 defmodule Daemon.ShutdownSimulatorRequest do
@@ -78,7 +78,7 @@ defmodule Daemon.ShutdownSimulatorRequest do
 
   use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
 
-  field :identifier, 1, type: :string
+  field(:identifier, 1, type: :string)
 end
 
 defmodule Daemon.Device do
@@ -86,11 +86,11 @@ defmodule Daemon.Device do
 
   use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
 
-  field :id, 1, type: :string
-  field :name, 2, type: :string
-  field :model, 3, type: :string
-  field :ios_version, 4, type: :string, json_name: "iosVersion"
-  field :connected, 5, type: :bool
+  field(:id, 1, type: :string)
+  field(:name, 2, type: :string)
+  field(:model, 3, type: :string)
+  field(:ios_version, 4, type: :string, json_name: "iosVersion")
+  field(:connected, 5, type: :bool)
 end
 
 defmodule Daemon.ListDevicesResponse do
@@ -98,7 +98,7 @@ defmodule Daemon.ListDevicesResponse do
 
   use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
 
-  field :devices, 1, repeated: true, type: Daemon.Device
+  field(:devices, 1, repeated: true, type: Daemon.Device)
 end
 
 defmodule Daemon.CompileProjectRequest do
@@ -106,10 +106,10 @@ defmodule Daemon.CompileProjectRequest do
 
   use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
 
-  field :project_path, 1, type: :string, json_name: "projectPath"
-  field :scheme, 2, type: :string
-  field :configuration, 3, type: :string
-  field :destination, 4, type: :string
+  field(:project_path, 1, type: :string, json_name: "projectPath")
+  field(:scheme, 2, type: :string)
+  field(:configuration, 3, type: :string)
+  field(:destination, 4, type: :string)
 end
 
 defmodule Daemon.CompileProjectResponse do
@@ -117,10 +117,10 @@ defmodule Daemon.CompileProjectResponse do
 
   use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
 
-  field :success, 1, type: :bool
-  field :output, 2, type: :string
-  field :error, 3, type: :string
-  field :exit_code, 4, type: :int32, json_name: "exitCode"
+  field(:success, 1, type: :bool)
+  field(:output, 2, type: :string)
+  field(:error, 3, type: :string)
+  field(:exit_code, 4, type: :int32, json_name: "exitCode")
 end
 
 defmodule Daemon.RunTestsRequest do
@@ -128,10 +128,10 @@ defmodule Daemon.RunTestsRequest do
 
   use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
 
-  field :project_path, 1, type: :string, json_name: "projectPath"
-  field :scheme, 2, type: :string
-  field :configuration, 3, type: :string
-  field :destination, 4, type: :string
+  field(:project_path, 1, type: :string, json_name: "projectPath")
+  field(:scheme, 2, type: :string)
+  field(:configuration, 3, type: :string)
+  field(:destination, 4, type: :string)
 end
 
 defmodule Daemon.RunTestsResponse do
@@ -139,13 +139,13 @@ defmodule Daemon.RunTestsResponse do
 
   use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
 
-  field :success, 1, type: :bool
-  field :output, 2, type: :string
-  field :error, 3, type: :string
-  field :exit_code, 4, type: :int32, json_name: "exitCode"
-  field :tests_run, 5, type: :int32, json_name: "testsRun"
-  field :tests_passed, 6, type: :int32, json_name: "testsPassed"
-  field :tests_failed, 7, type: :int32, json_name: "testsFailed"
+  field(:success, 1, type: :bool)
+  field(:output, 2, type: :string)
+  field(:error, 3, type: :string)
+  field(:exit_code, 4, type: :int32, json_name: "exitCode")
+  field(:tests_run, 5, type: :int32, json_name: "testsRun")
+  field(:tests_passed, 6, type: :int32, json_name: "testsPassed")
+  field(:tests_failed, 7, type: :int32, json_name: "testsFailed")
 end
 
 defmodule Daemon.Daemon.Service do
