@@ -3,7 +3,7 @@
     <div class="px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-16">
         <div class="flex items-center">
-          <h1 class="text-xl font-semibold text-gray-900">Ignite</h1>
+          <h1 class="text-xl font-semibold text-gray-900">🔥 Ignite</h1>
         </div>
         
         <nav class="flex items-center space-x-4">

@@ -2,9 +2,9 @@ import ArgumentParser
 import Foundation
 
 @main
-struct SidekickSwift: ParsableCommand {
+struct DaemonSwift: ParsableCommand {
     static let configuration = CommandConfiguration(
-        commandName: "sidekick-swift",
+        commandName: "daemon-swift",
         abstract: "Swift agent for Ignite that manages Apple platform operations",
         version: "0.1.0"
     )
@@ -17,7 +17,7 @@ struct SidekickSwift: ParsableCommand {
     
     mutating func run() throws {
         if verbose {
-            print("🚀 Sidekick Swift Agent")
+            print("🚀 Daemon Swift Agent")
             print("Arguments: \(arguments)")
         }
         
@@ -26,7 +26,7 @@ struct SidekickSwift: ParsableCommand {
         if !arguments.isEmpty {
             print("Received arguments: \(arguments.joined(separator: " "))")
         } else {
-            print("🚀 Sidekick Swift is running!")
+            print("🚀 Daemon Swift is running!")
         }
     }
 }

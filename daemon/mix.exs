@@ -1,9 +1,9 @@
-defmodule Sidekick.MixProject do
+defmodule Daemon.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :sidekick,
+      app: :daemon,
       version: "0.1.0",
       elixir: "~> 1.18",
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -34,6 +34,7 @@ defmodule Sidekick.MixProject do
       
       # Platform operations
       {:orchard, github: "tuist/orchard"},
+      {:muontrap, "~> 1.0"},
       
       # Development dependencies
       {:ex_doc, "~> 0.34", only: :dev, runtime: false},

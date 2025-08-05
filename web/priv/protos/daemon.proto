@@ -1,9 +1,9 @@
 syntax = "proto3";
 
-package sidekick;
+package daemon;
 
-// The Sidekick service provides platform-specific operations for macOS
-service Sidekick {
+// The Daemon service provides platform-specific operations for macOS
+service Daemon {
   // Health check
   rpc HealthCheck(Empty) returns (Empty);
   
@@ -27,6 +27,9 @@ service Sidekick {
   // Build operations
   rpc CompileProject(CompileProjectRequest) returns (CompileProjectResponse);
   rpc RunTests(RunTestsRequest) returns (RunTestsResponse);
+  
+  // Build environment operations
+  rpc GetBuildEnvironmentInfo(Empty) returns (BuildEnvironmentInfoResponse);
 }
 
 message Empty {}
@@ -122,4 +125,9 @@ message RunTestsResponse {
   int32 tests_run = 5;
   int32 tests_passed = 6;
   int32 tests_failed = 7;
+}
+
+message BuildEnvironmentInfoResponse {
+  string local_ip = 1;
+  string tailscale_url = 2;
 }

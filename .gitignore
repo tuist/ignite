@@ -1,27 +1,27 @@
 # The directory Mix will write compiled artifacts to.
 /_build/
 /web/_build/
-/sidekick/_build/
+/daemon/_build/
 
 # If you run "mix test --cover", coverage assets end up here.
 /cover/
 /web/cover/
-/sidekick/cover/
+/daemon/cover/
 
 # The directory Mix downloads your dependencies sources to.
 /deps/
 /web/deps/
-/sidekick/deps/
+/daemon/deps/
 
 # Where 3rd-party dependencies like ExDoc output generated docs.
 /doc/
 /web/doc/
-/sidekick/doc/
+/daemon/doc/
 
 # Ignore .fetch files in case you like to edit your project deps locally.
 /.fetch
 /web/.fetch
-/sidekick/.fetch
+/daemon/.fetch
 
 # If the VM crashes, it generates a dump, let's ignore it too.
 erl_crash.dump
@@ -51,7 +51,7 @@ npm-debug.log
 # Elixir Language Server
 /.elixir_ls/
 /web/.elixir_ls/
-/sidekick/.elixir_ls/
+/daemon/.elixir_ls/
 
 # Release archives
 /releases/

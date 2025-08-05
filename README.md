@@ -31,8 +31,8 @@ Ignite is organized as a monorepo with the following components:
 ignite/
 ├── app/              # Native iOS/macOS app (Swift)
 ├── web/              # Main server (Elixir/Phoenix + Vue.js)
-├── sidekick/         # Infrastructure service (Elixir)
-├── sidekick-swift/   # Companion to interface with macOS platform
+├── daemon/           # Infrastructure service (Elixir)
+├── daemon-swift/     # Companion to interface with macOS platform
 └── worker/           # Cloudflare Worker for marketing site
 ```
 

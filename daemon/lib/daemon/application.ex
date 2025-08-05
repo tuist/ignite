@@ -1,8 +1,8 @@
-defmodule Sidekick.Application do
+defmodule Daemon.Application do
   @moduledoc """
-  The Sidekick OTP Application.
+  The Daemon OTP Application.
   
-  This starts the supervision tree for Sidekick, which includes
+  This starts the supervision tree for Daemon, which includes
   Orchard for simulator management.
   """
   
@@ -15,7 +15,7 @@ defmodule Sidekick.Application do
       # We don't need to add anything here since Orchard starts its own supervision tree
     ]
     
-    opts = [strategy: :one_for_one, name: Sidekick.Supervisor]
+    opts = [strategy: :one_for_one, name: Daemon.Supervisor]
     Supervisor.start_link(children, opts)
   end
 end

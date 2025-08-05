@@ -10,14 +10,14 @@ defmodule Mix.Tasks.Protobuf.Generate do
     System.cmd("protoc", [
       "--elixir_out=plugins=grpc:./lib/ignite/grpc/proto",
       "--proto_path=./priv/protos",
-      "./priv/protos/sidekick.proto"
+      "./priv/protos/daemon.proto"
     ], into: IO.stream(:stdio, :line))
     
-    # Generate for sidekick project
+    # Generate for daemon project
     System.cmd("protoc", [
-      "--elixir_out=plugins=grpc:./sidekick/lib/sidekick/proto",
-      "--proto_path=./sidekick/priv/protos",
-      "./sidekick/priv/protos/sidekick.proto"
+      "--elixir_out=plugins=grpc:./daemon/lib/daemon/proto",
+      "--proto_path=./daemon/priv/protos",
+      "./daemon/priv/protos/daemon.proto"
     ], into: IO.stream(:stdio, :line))
     
     Mix.shell().info("Protobuf files generated successfully!")

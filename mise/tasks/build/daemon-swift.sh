@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-cd sidekick-swift
+cd daemon-swift
 swift build

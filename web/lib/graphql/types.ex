@@ -34,6 +34,11 @@ defmodule IgniteWeb.GraphQL.Types do
     field :state, non_null(:string)
   end
   
+  object :build_environment_info do
+    field :local_ip, non_null(:string)
+    field :tailscale_url, :string
+  end
+  
   scalar :datetime do
     parse fn input ->
       case DateTime.from_iso8601(input.value) do

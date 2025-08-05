@@ -1,8 +1,10 @@
 # Ignite Agent Architecture
 
+> **Note**: For upcoming tasks and development plans, see [PLAN.md](./PLAN.md)
+
 ## Overview
 
-Ignite is an agentic coding assistant for developing applications for Apple platforms (iOS, macOS, watchOS, tvOS). It provides multiple interfaces including a Vue.js SPA for web clients and a native sidekick-swift component for platform-specific operations.
+Ignite is an agentic coding assistant for developing applications for Apple platforms (iOS, macOS, watchOS, tvOS). It provides multiple interfaces including a Vue.js SPA for web clients and a native daemon-swift component for platform-specific operations.
 
 ## Architecture
 
@@ -25,12 +27,12 @@ Ignite is an agentic coding assistant for developing applications for Apple plat
 3. **GRPC Server** - Internal communication layer
    - Provides RPC endpoints for native operations
    - Handles authentication between components
-   - Used by sidekick-swift for platform-specific tasks
+   - Used by daemon-swift for platform-specific tasks
    - Runs on port 9090
 
 4. **Implementation Details** (not exposed to users)
-   - **Sidekick** - Internal service that bridges the GRPC server with system operations
-   - **Sidekick-Swift** - Renamed from ignite-swift, handles Apple platform-specific operations
+   - **Daemon** - Internal service that bridges the GRPC server with system operations
+   - **Daemon-Swift** - Renamed from ignite-swift, handles Apple platform-specific operations
    - **Orchard** - Manages Apple simulators and devices through OTP supervision trees
    - **AXe** - Provides low-level simulator control and UI automation
 
@@ -40,7 +42,7 @@ Ignite is an agentic coding assistant for developing applications for Apple plat
 2. Vue app makes GraphQL queries/mutations
 3. Absinthe processes GraphQL requests
 4. Real-time updates delivered via GraphQL subscriptions
-5. Native operations delegated to sidekick-swift via GRPC
+5. Native operations delegated to daemon-swift via GRPC
 6. Orchard manages simulator/device lifecycle
 7. UI updates reflect system state changes
 
@@ -62,7 +64,7 @@ The system uses several internal services to provide functionality:
 - **Database**: SQLite with Ecto for data persistence (XDG-compliant location)
 - **Build System**: Vite for JavaScript bundling with Vue and Tailwind CSS v4 plugins
 - **Package Management**: PNPM for JavaScript dependencies
-- **Native Components**: sidekick-swift for Apple platform operations
+- **Native Components**: daemon-swift for Apple platform operations
 - **Simulator Management**: Orchard library integrated for real simulator/device data
 
 ### Development Setup
@@ -74,3 +76,27 @@ The system uses several internal services to provide functionality:
 5. **Database**: Automatically migrates on application start, stored in XDG-compliant directory
 
 All implementation details are abstracted from the user - they interact with either the Vue.js web interface or native clients that provide development assistance for Apple platforms.
+
+## Important Development Guidelines
+
+### System Process Execution
+**Always use MuonTrap** for executing system commands instead of `System.cmd/3`. MuonTrap provides:
+- Proper process cleanup and supervision
+- Prevention of zombie processes
+- Better error handling for missing commands
+- Resource limits and timeouts
+
+Example:
+```elixir
+# Don't use this:
+System.cmd("tailscale", ["status", "--json"])
+
+# Use this instead:
+MuonTrap.cmd("tailscale", ["status", "--json"], stderr_to_stdout: true)
+```
+
+This is especially important for:
+- Commands that might not be installed (like `tailscale`)
+- Long-running processes
+- Commands that spawn child processes
+- Any system interaction in production code
