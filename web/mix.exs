@@ -49,7 +49,7 @@ defmodule Ignite.MixProject do
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
-      {:burrito, "~> 1.2.0"},
+      {:burrito, "~> 1.4.0"},
       {:muontrap, "~> 1.5"},
       
       # Database dependencies
