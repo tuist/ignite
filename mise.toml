@@ -5,7 +5,7 @@
     git-cliff = "2.4.0"
     sops = "3.9.3"
     age = "1.2.1"
-    "npm:wrangler" = "4.27.0"
+    "npm:wrangler" = "4.28.0"
     "pnpm" = "10.14"
     tuist = "4.57.0"
 
