@@ -1,5 +1,6 @@
 defmodule DaemonTest do
   use ExUnit.Case, async: true
+  use Mimic
 
   describe "start_link/1" do
     test "starts the daemon with required server_url" do
@@ -55,9 +56,32 @@ defmodule DaemonTest do
     end
 
     test "returns list of simulators", %{daemon: daemon} do
+      # Mock Orchard.Simulator.list/0 to return test data
+      mock_simulators = [
+        %{
+          udid: "test-sim-1",
+          name: "iPhone 15 Pro",
+          device_type: "iPhone 15 Pro",
+          runtime: "iOS 17.2",
+          state: "Shutdown"
+        },
+        %{
+          udid: "test-sim-2",
+          name: "iPhone 14",
+          device_type: "iPhone 14",
+          runtime: "iOS 17.2",
+          state: "Booted"
+        }
+      ]
+      
+      expect(Orchard.Simulator, :list, fn -> {:ok, mock_simulators} end)
+      
       result = Daemon.list_simulators(daemon)
       assert {:ok, simulators} = result
       assert is_list(simulators)
+      assert length(simulators) == 2
+      assert Enum.at(simulators, 0).identifier == "test-sim-1"
+      assert Enum.at(simulators, 1).is_available == true  # Booted simulator
     end
   end
 
@@ -69,9 +93,31 @@ defmodule DaemonTest do
     end
 
     test "returns list of devices", %{daemon: daemon} do
+      # Mock Orchard.Device.list/0 to return test data
+      mock_devices = [
+        %{
+          udid: "test-device-1",
+          name: "Test iPhone",
+          device_type: "iPhone 13 Pro",
+          connection_type: "USB"
+        }
+      ]
+      
+      expect(Orchard.Device, :list, fn -> {:ok, mock_devices} end)
+      
       result = Daemon.list_devices(daemon)
       assert {:ok, devices} = result
       assert is_list(devices)
+      assert length(devices) == 1
+      assert Enum.at(devices, 0).identifier == "test-device-1"
+    end
+    
+    test "handles error from Orchard.Device.list", %{daemon: daemon} do
+      # Mock Orchard.Device.list/0 to return an error
+      expect(Orchard.Device, :list, fn -> {:error, "Device listing failed"} end)
+      
+      result = Daemon.list_devices(daemon)
+      assert {:error, "Device listing failed"} = result
     end
   end
 
