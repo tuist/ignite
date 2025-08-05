@@ -1,0 +1,104 @@
+name: Daemon CI
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'daemon/**'
+      - '.github/workflows/daemon.yaml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'daemon/**'
+      - '.github/workflows/daemon.yaml'
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: daemon
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Elixir
+      uses: erlef/setup-beam@v1
+      with:
+        elixir-version: '1.15.7'
+        otp-version: '26.0'
+    
+    - name: Restore dependencies cache
+      uses: actions/cache@v3
+      with:
+        path: daemon/deps
+        key: ${{ runner.os }}-mix-${{ hashFiles('daemon/mix.lock') }}
+        restore-keys: ${{ runner.os }}-mix-
+    
+    - name: Install dependencies
+      run: mix deps.get
+    
+    - name: Compile with warnings as errors
+      run: mix compile --warnings-as-errors
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: daemon
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Elixir
+      uses: erlef/setup-beam@v1
+      with:
+        elixir-version: '1.15.7'
+        otp-version: '26.0'
+    
+    - name: Restore dependencies cache
+      uses: actions/cache@v3
+      with:
+        path: daemon/deps
+        key: ${{ runner.os }}-mix-${{ hashFiles('daemon/mix.lock') }}
+        restore-keys: ${{ runner.os }}-mix-
+    
+    - name: Install dependencies
+      run: mix deps.get
+    
+    - name: Run tests
+      run: mix test
+
+  format:
+    name: Format Check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: daemon
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Elixir
+      uses: erlef/setup-beam@v1
+      with:
+        elixir-version: '1.15.7'
+        otp-version: '26.0'
+    
+    - name: Restore dependencies cache
+      uses: actions/cache@v3
+      with:
+        path: daemon/deps
+        key: ${{ runner.os }}-mix-${{ hashFiles('daemon/mix.lock') }}
+        restore-keys: ${{ runner.os }}-mix-
+    
+    - name: Install dependencies
+      run: mix deps.get
+    
+    - name: Install Quokka
+      run: mix archive.install hex quokka --force
+    
+    - name: Check formatting with Quokka
+      run: mix quokka.format --check-formatted
