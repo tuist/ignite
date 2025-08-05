@@ -1,4 +1,4 @@
-#\!/usr/bin/env bash
+#!/usr/bin/env bash
 #MISE description="Run tests for the daemon"
 set -eo pipefail
 
