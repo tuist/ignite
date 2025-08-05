@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-cd daemon-swift
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "${script_dir}/../../daemon-swift"
 swift build

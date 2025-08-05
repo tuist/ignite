@@ -15,7 +15,7 @@ This document tracks upcoming tasks and features for the Ignite project. Add new
   - Update both Vue.js app and worker page navigation
 
 ### Medium Priority
-- [ ] Integrate sidekick with macOS notification system
+- [ ] Integrate daemon with macOS notification system
   - Send native macOS notifications for important events
   - Support notification actions and responses
   - Integrate with system notification preferences

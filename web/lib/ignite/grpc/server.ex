@@ -204,10 +204,10 @@ defmodule Ignite.GRPC.Server do
 
   @doc """
   Get build environment info including local IP and Tailscale URL
-  This asks sidekick for the information since it has access to the local system
+  This asks daemon for the information since it has access to the local system
   """
   def get_build_environment_info(_request, _stream) do
-    Logger.debug("GRPC: get_build_environment_info called - asking sidekick")
+    Logger.debug("GRPC: get_build_environment_info called - asking daemon")
     
     case Daemon.get_build_environment_info(Ignite.Daemon) do
       {:ok, info} ->
@@ -217,7 +217,7 @@ defmodule Ignite.GRPC.Server do
         }
       
       {:error, reason} ->
-        Logger.error("Failed to get build environment info from sidekick: #{inspect(reason)}")
+        Logger.error("Failed to get build environment info from daemon: #{inspect(reason)}")
         raise GRPC.RPCError, status: :internal, message: "Failed to get build environment info"
     end
   end
