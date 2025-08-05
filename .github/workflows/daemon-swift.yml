@@ -12,6 +12,9 @@ on:
       - "daemon-swift/**"
       - ".github/workflows/daemon-swift.yml"
 
+permissions:
+  contents: read
+
 jobs:
   build:
     name: Build
@@ -20,10 +23,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: jdx/mise-action@v2
+      - uses: jdx/mise-action@f20a77c9fddb7001d2af929298f7807cb2014520
 
       - name: Restore SPM cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: daemon-swift/.build
           key: ${{ runner.os }}-spm-${{ hashFiles('daemon-swift/Package.resolved') }}
@@ -39,10 +42,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: jdx/mise-action@v2
+      - uses: jdx/mise-action@f20a77c9fddb7001d2af929298f7807cb2014520
 
       - name: Restore SPM cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: daemon-swift/.build
           key: ${{ runner.os }}-spm-${{ hashFiles('daemon-swift/Package.resolved') }}
@@ -58,7 +61,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: jdx/mise-action@v2
+      - uses: jdx/mise-action@f20a77c9fddb7001d2af929298f7807cb2014520
 
       - name: Check formatting with SwiftLint
         run: mise run lint:daemon-swift
