@@ -1,16 +1,14 @@
-#\!/usr/bin/env bash
+#!/usr/bin/env bash
 #MISE description="Lint the daemon with Quokka"
+#USAGE flag "--fix" help="Fix formatting issues instead of just checking"
 set -eo pipefail
 
-script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "${script_dir}/../../daemon"
 
-# Check if Quokka is installed
-if \! mix archive 2>&1 | grep -q "quokka"; then
-  echo "Installing Quokka..."
-  mix archive.install hex quokka --force
+# Check if --fix flag is provided
+if [[ "${usage_fix:-}" == "true" ]]; then
+  echo "Formatting daemon code..."
+  (cd daemon && mix format)
+else
+  # Run format check with Quokka plugin
+  (cd daemon && mix format --check-formatted)
 fi
-
-# Run format check
-mix quokka.format --check-formatted
-EOF < /dev/null

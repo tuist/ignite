@@ -1,4 +1,4 @@
 import Config
 
 # Configure logger for tests
-config :logger, level: :warning
+config :logger, level: :critical

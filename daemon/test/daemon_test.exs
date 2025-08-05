@@ -1,5 +1,5 @@
 defmodule DaemonTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case
   use Mimic
 
   describe "start_link/1" do
@@ -49,6 +49,8 @@ defmodule DaemonTest do
   end
 
   describe "list_simulators/1" do
+    setup :set_mimic_global
+
     setup do
       {:ok, pid} = Daemon.start_link(server_url: "localhost:9090", name: :test_daemon_sims)
       on_exit(fn -> Process.alive?(pid) && GenServer.stop(pid) end)
@@ -73,19 +75,23 @@ defmodule DaemonTest do
           state: "Booted"
         }
       ]
-      
-      expect(Orchard.Simulator, :list, fn -> {:ok, mock_simulators} end)
-      
+
+      # Create a stub that can be called from any process
+      stub(Orchard.Simulator, :list, fn -> {:ok, mock_simulators} end)
+
       result = Daemon.list_simulators(daemon)
       assert {:ok, simulators} = result
       assert is_list(simulators)
       assert length(simulators) == 2
       assert Enum.at(simulators, 0).identifier == "test-sim-1"
-      assert Enum.at(simulators, 1).is_available == true  # Booted simulator
+      # Booted simulator
+      assert Enum.at(simulators, 1).is_available == true
     end
   end
 
   describe "list_devices/1" do
+    setup :set_mimic_global
+
     setup do
       {:ok, pid} = Daemon.start_link(server_url: "localhost:9090", name: :test_daemon_devices)
       on_exit(fn -> Process.alive?(pid) && GenServer.stop(pid) end)
@@ -102,20 +108,21 @@ defmodule DaemonTest do
           connection_type: "USB"
         }
       ]
-      
-      expect(Orchard.Device, :list, fn -> {:ok, mock_devices} end)
-      
+
+      # Create a stub that can be called from any process
+      stub(Orchard.Device, :list, fn -> {:ok, mock_devices} end)
+
       result = Daemon.list_devices(daemon)
       assert {:ok, devices} = result
       assert is_list(devices)
       assert length(devices) == 1
       assert Enum.at(devices, 0).identifier == "test-device-1"
     end
-    
+
     test "handles error from Orchard.Device.list", %{daemon: daemon} do
       # Mock Orchard.Device.list/0 to return an error
-      expect(Orchard.Device, :list, fn -> {:error, "Device listing failed"} end)
-      
+      stub(Orchard.Device, :list, fn -> {:error, "Device listing failed"} end)
+
       result = Daemon.list_devices(daemon)
       assert {:error, "Device listing failed"} = result
     end
@@ -204,16 +211,17 @@ defmodule DaemonTest do
     test "handles reconnection after failed connection" do
       # Start with invalid server URL to trigger reconnection logic
       {:ok, pid} = Daemon.start_link(server_url: nil, name: :test_daemon_reconnect)
-      
+
       # Give it a moment to attempt connection
       Process.sleep(100)
-      
+
       # Should still be alive despite connection failure
       assert Process.alive?(pid)
-      
+
       # Should return error when not connected
-      assert {:error, "Not connected to Daemon agent"} = Daemon.health_check(:test_daemon_reconnect)
-      
+      assert {:error, "Not connected to Daemon agent"} =
+               Daemon.health_check(:test_daemon_reconnect)
+
       GenServer.stop(pid)
     end
   end

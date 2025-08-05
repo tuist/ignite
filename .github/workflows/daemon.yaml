@@ -1,4 +1,4 @@
-name: Daemon CI
+name: Daemon
 
 on:
   push:
