@@ -1,6 +1,6 @@
 [tools]
     elixir = "1.18.4"
-    erlang = "27.1"
+    erlang = "27.3.4"
     zig = "0.13.0"
     git-cliff = "2.4.0"
     sops = "3.9.3"
