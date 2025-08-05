@@ -8,6 +8,7 @@
     "npm:wrangler" = "4.28.0"
     "pnpm" = "10.14"
     tuist = "4.57.0"
+    swiftlint = "0.57.1"
 
 [hooks]
     postinstall = "mise run install"
