@@ -1,0 +1,64 @@
+name: Daemon Swift
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "daemon-swift/**"
+      - ".github/workflows/daemon-swift.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "daemon-swift/**"
+      - ".github/workflows/daemon-swift.yml"
+
+jobs:
+  build:
+    name: Build
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: jdx/mise-action@v2
+
+      - name: Restore SPM cache
+        uses: actions/cache@v3
+        with:
+          path: daemon-swift/.build
+          key: ${{ runner.os }}-spm-${{ hashFiles('daemon-swift/Package.resolved') }}
+          restore-keys: ${{ runner.os }}-spm-
+
+      - name: Build
+        run: mise run build:daemon-swift
+
+  test:
+    name: Test
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: jdx/mise-action@v2
+
+      - name: Restore SPM cache
+        uses: actions/cache@v3
+        with:
+          path: daemon-swift/.build
+          key: ${{ runner.os }}-spm-${{ hashFiles('daemon-swift/Package.resolved') }}
+          restore-keys: ${{ runner.os }}-spm-
+
+      - name: Run tests
+        run: mise run test:daemon-swift
+
+  lint:
+    name: Lint
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: jdx/mise-action@v2
+
+      - name: Check formatting with SwiftLint
+        run: mise run lint:daemon-swift

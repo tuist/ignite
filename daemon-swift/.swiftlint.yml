@@ -1,0 +1,62 @@
+included:
+  - Sources
+  - Tests
+
+excluded:
+  - .build
+  - Package.swift
+
+opt_in_rules:
+  - empty_count
+  - closure_spacing
+  - collection_alignment
+  - contains_over_first_not_nil
+  - empty_string
+  - first_where
+  - force_unwrapping
+  - implicitly_unwrapped_optional
+  - last_where
+  - literal_expression_end_indentation
+  - multiline_parameters
+  - prefer_zero_over_explicit_init
+
+disabled_rules:
+  - trailing_comma
+  - todo
+  - fixme
+
+line_length:
+  warning: 120
+  error: 200
+
+type_body_length:
+  warning: 300
+  error: 500
+
+file_length:
+  warning: 500
+  error: 1000
+
+function_body_length:
+  warning: 50
+  error: 100
+
+cyclomatic_complexity:
+  warning: 10
+  error: 20
+
+type_name:
+  min_length: 3
+  max_length: 50
+
+identifier_name:
+  min_length: 2
+  max_length: 50
+  excluded:
+    - id
+    - url
+    - i
+    - j
+    - x
+    - y
+    - z
