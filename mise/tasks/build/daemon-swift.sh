@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "${script_dir}/../../../daemon-swift"
-
 echo "🔨 Building daemon-swift..."
+cd daemon-swift
 swift build --configuration release
 echo "✅ Build complete"
