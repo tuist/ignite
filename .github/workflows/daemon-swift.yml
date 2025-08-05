@@ -23,7 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: jdx/mise-action@f20a77c9fddb7001d2af929298f7807cb2014520
+      - uses: jdx/mise-action@c37c93293d6b742fc901e1406b8f764f6fb19dac
 
       - name: Restore SPM cache
         uses: actions/cache@v4
@@ -42,7 +42,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: jdx/mise-action@f20a77c9fddb7001d2af929298f7807cb2014520
+      - uses: jdx/mise-action@c37c93293d6b742fc901e1406b8f764f6fb19dac
 
       - name: Restore SPM cache
         uses: actions/cache@v4
@@ -61,7 +61,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: jdx/mise-action@f20a77c9fddb7001d2af929298f7807cb2014520
+      - uses: jdx/mise-action@c37c93293d6b742fc901e1406b8f764f6fb19dac
 
       - name: Check formatting with SwiftLint
         run: mise run lint:daemon-swift
