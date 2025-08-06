@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 <!-- RELEASE NOTES START -->
+## [0.16.5] - 2025-08-06
+
+### <!-- 7 -->🏗️ Miscellaneous Tasks
+- Remove path-based triggers from GitHub Actions workflows by @pepicrft
+**Full Changelog**: https://github.com/tuist/ignite/compare/0.16.4...0.16.5
+<!-- RELEASE NOTES START -->
 ## [0.16.4] - 2025-08-06
 
 ### <!-- 1 -->🐛 Bug Fixes
