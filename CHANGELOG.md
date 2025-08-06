@@ -3,6 +3,45 @@
 All notable changes to this project will be documented in this file.
 
 <!-- RELEASE NOTES START -->
+## [0.16.4] - 2025-08-06
+
+### <!-- 1 -->🐛 Bug Fixes
+- Regenerate daemon protobuf to include BuildEnvironmentInfoResponse by @pepicrft
+**Full Changelog**: https://github.com/tuist/ignite/compare/0.16.3...0.16.4
+<!-- RELEASE NOTES START -->
+## [0.16.3] - 2025-08-06
+
+### <!-- 1 -->🐛 Bug Fixes
+- Remove duplicate protobuf file from web app to resolve module conflicts by @pepicrft
+**Full Changelog**: https://github.com/tuist/ignite/compare/0.16.2...0.16.3
+<!-- RELEASE NOTES START -->
+## [0.16.2] - 2025-08-06
+
+### <!-- 1 -->🐛 Bug Fixes
+- Disable cancel-in-progress for release workflow to prevent builds from being canceled by @pepicrft
+**Full Changelog**: https://github.com/tuist/ignite/compare/0.16.1...0.16.2
+<!-- RELEASE NOTES START -->
+## [0.16.1] - 2025-08-06
+
+### <!-- 1 -->🐛 Bug Fixes
+- Run Mix commands from web/ directory in release build script by @pepicrft
+**Full Changelog**: https://github.com/tuist/ignite/compare/0.16.0...0.16.1
+<!-- RELEASE NOTES START -->
+## [0.16.0] - 2025-08-06
+
+### <!-- 0 -->⛰️  Features
+- **daemon-swift**: Add testing infrastructure and CI pipeline by @pepicrft- Add daemon CI workflow with build, test, and format checks by @pepicrft- Reorganize project structure into monorepo by @pepicrft
+
+### <!-- 1 -->🐛 Bug Fixes
+- Update release workflow to use correct mix.exs path in web/ directory by @pepicrft- Use correct commit hash for mise-action@v2 by @pepicrft- Address CodeRabbit review comments by @pepicrft- Correct shebang in daemon test script by @pepicrft- Remove working-directory from daemon workflow by @pepicrft- Only run tuist install on macOS by @pepicrft- Add missing dev.exs and prod.exs config files by @pepicrft- Address PR review comments by @pepicrft
+
+### <!-- 4 -->🔨 Refactor
+- Simplify mise task paths to be relative to project root by @pepicrft- Use Mimic for proper test mocking by @pepicrft- Rename sidekick to daemon throughout codebase by @pepicrft- Reorganize project as monorepo with separate components by @pepicrft
+
+### <!-- 6 -->🧪 Testing
+- Add comprehensive test suite for daemon by @pepicrft
+**Full Changelog**: https://github.com/tuist/ignite/compare/0.15.0...0.16.0
+<!-- RELEASE NOTES START -->
 ## [0.15.0] - 2025-08-03
 
 ### <!-- 0 -->⛰️  Features
