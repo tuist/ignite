@@ -12,7 +12,7 @@ permissions:
 
 concurrency:
   group: release-workflow-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 env:
   MISE_SOPS_AGE_KEY: ${{ secrets.MISE_SOPS_AGE_KEY }}
