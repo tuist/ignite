@@ -92,7 +92,7 @@ jobs:
       - name: Update version in mix.exs
         run: |
           VERSION="${{ needs.check-release.outputs.next-version }}"
-          sed -i '' "s/@version \".*\"/@version \"$VERSION\"/" mix.exs
+          sed -i '' "s/@version \".*\"/@version \"$VERSION\"/" web/mix.exs
 
       - name: Update CHANGELOG.md
         run: git-cliff --bump -o CHANGELOG.md
@@ -119,7 +119,7 @@ jobs:
             SHA256.txt
             SHA512.txt
             CHANGELOG.md
-            mix.exs
+            web/mix.exs
           retention-days: 1
 
   commit-and-release:
@@ -147,7 +147,7 @@ jobs:
           git config user.email "github-actions@github.com"
           
           # Add changed files
-          git add CHANGELOG.md mix.exs
+          git add CHANGELOG.md web/mix.exs
           
           # Check if there are changes to commit
           if ! git diff --cached --quiet; then
