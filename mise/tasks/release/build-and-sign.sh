@@ -40,15 +40,17 @@ fi
 print_status "Building release with Burrito..."
 
 # Clean previous builds
-rm -rf _build/prod
-rm -rf burrito_out
+rm -rf web/_build/prod
+rm -rf web/burrito_out
 
-# Get dependencies and compile
+# Get dependencies and compile (run from web directory)
+cd web
 MIX_ENV=prod mix deps.get
 MIX_ENV=prod mix compile
 
 # Ensure assets are built for production
 MIX_ENV=prod mix assets.deploy
+cd ..
 
 # Build Swift executable first
 print_status "Building Swift executable..."
@@ -61,24 +63,26 @@ if [ ! -f "$SWIFT_BINARY" ]; then
 fi
 cd ..
 
-# Build the release with Burrito
+# Build the release with Burrito (from web directory)
 print_status "Running mix release with Burrito..."
+cd web
 MIX_ENV=prod BURRITO_TARGET=macos_arm mix release --overwrite
+cd ..
 
 print_status "Looking for Burrito output..."
 
 # Find the Burrito executable
-if [ ! -d "burrito_out" ]; then
+if [ ! -d "web/burrito_out" ]; then
     print_error "Burrito output directory not found!"
     exit 1
 fi
 
 # Find the macOS executable
-BURRITO_BINARY=$(find burrito_out -type f -name "ignite*" | grep -v ".exe" | head -1)
+BURRITO_BINARY=$(find web/burrito_out -type f -name "ignite*" | grep -v ".exe" | head -1)
 
 if [ -z "$BURRITO_BINARY" ] || [ ! -f "$BURRITO_BINARY" ]; then
     print_error "Burrito binary not found!"
-    ls -la burrito_out/
+    ls -la web/burrito_out/
     exit 1
 fi
 
@@ -258,7 +262,7 @@ fi
 
 # Clean up temporary files
 rm -f ignite daemon-swift-binary daemon-swift-executable
-rm -rf burrito_out
+rm -rf web/burrito_out
 
 print_status "Release build complete!"
 echo "Artifacts created:"
