@@ -3,14 +3,8 @@ name: Daemon Swift
 on:
   push:
     branches: [main]
-    paths:
-      - "daemon-swift/**"
-      - ".github/workflows/daemon-swift.yml"
   pull_request:
     branches: [main]
-    paths:
-      - "daemon-swift/**"
-      - ".github/workflows/daemon-swift.yml"
 
 permissions:
   contents: read

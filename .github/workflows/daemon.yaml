@@ -3,14 +3,8 @@ name: Daemon
 on:
   push:
     branches: [main]
-    paths:
-      - "daemon/**"
-      - ".github/workflows/daemon.yaml"
   pull_request:
     branches: [main]
-    paths:
-      - "daemon/**"
-      - ".github/workflows/daemon.yaml"
 
 jobs:
   build:
