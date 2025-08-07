@@ -1,7 +1,7 @@
 defmodule Ignite.MixProject do
   use Mix.Project
 
-  @version "0.16.5"
+  @version "0.16.6"
 
   def project do
     [

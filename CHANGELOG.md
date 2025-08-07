@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 <!-- RELEASE NOTES START -->
+## [0.16.6] - 2025-08-07
+
+### <!-- 1 -->🐛 Bug Fixes
+- Format protobuf generated file to pass CI linting by @pepicrft
+**Full Changelog**: https://github.com/tuist/ignite/compare/0.16.5...0.16.6
+<!-- RELEASE NOTES START -->
 ## [0.16.5] - 2025-08-06
 
 ### <!-- 7 -->🏗️ Miscellaneous Tasks
