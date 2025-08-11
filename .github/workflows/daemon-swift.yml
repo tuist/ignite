@@ -15,7 +15,7 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: jdx/mise-action@e7e48454f463785eb202601d83c76a9b34d9f1c6
 
@@ -34,7 +34,7 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: jdx/mise-action@e7e48454f463785eb202601d83c76a9b34d9f1c6
 
@@ -53,7 +53,7 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: jdx/mise-action@e7e48454f463785eb202601d83c76a9b34d9f1c6
 
