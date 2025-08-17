@@ -37,7 +37,7 @@ defmodule Daemon.MixProject do
       {:muontrap, "~> 1.0"},
 
       # Development dependencies
-      {:ex_doc, "~> 0.34", only: :dev, runtime: false},
+      {:ex_doc, "~> 0.38", only: :dev, runtime: false},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:quokka, "~> 2.10", only: [:dev, :test], runtime: false},
       {:mimic, "~> 1.7", only: :test}
